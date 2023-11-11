@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+      <html lang="en">
+      <head>
+      <meta charset="UTF-8">
+      <title>KSWA Subject</title>
+  <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .subject-info {
+            width: 50%;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .subject-info h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+
+        .subject-info p {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .subject-info h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+            color: #3498db;
+        }
+
+        .subject-info ul {
+            padding-left: 20px;
+            font-size: 16px;
+            margin-top: 0;
+        }
+
+        #backButton {
+            margin-top: 20px;
+            padding: 15px 25px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #backButton:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+<button id="backButton" onclick="goBack()">Zurück</button>
+
+<div class="subject-info" id="subjectInfo">
+  <h1 id="subjectName">Fachname</h1>
+  <p id="subjectGrade">Fachnote: </p>
+  <h2>Tests:</h2>
+  <ul id="subjectTests">
+    <!-- Testinformationen werden hier eingefügt -->
+    <li>Test 1: Note 1.7</li>
+    <li>Test 2: Note 2.3</li>
+  </ul>
+</div>
+
+<script>
+    const subjectData = {
+        suname: "Mathematik",
+        sugrade: 1.8,
+        tests: [
+            { testName: "Test 1", testGrade: 1.7 },
+            { testName: "Test 2", testGrade: 2.3 }
+        ]
+    };
+
+    function displaySubjectInfo() {
+        const subjectNameElement = document.getElementById("subjectName");
+        const subjectGradeElement = document.getElementById("subjectGrade");
+        const subjectTestsElement = document.getElementById("subjectTests");
+
+        subjectNameElement.textContent = `Fachname: ${subjectData.suname}`;
+        subjectGradeElement.textContent = `Fachnote: ${subjectData.sugrade}`;
+
+        subjectTestsElement.innerHTML = "<h2>Tests:</h2><ul>";
+        for (const test of subjectData.tests) {
+            subjectTestsElement.innerHTML += `<li>${test.testName}: Note ${test.testGrade}</li>`;
+        }
+        subjectTestsElement.innerHTML += "</ul>";
+    }
+
+    displaySubjectInfo();
+
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
+</title>
+</head>
+<body>
+
+</body>
+</html>

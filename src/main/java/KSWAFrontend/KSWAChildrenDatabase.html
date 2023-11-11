@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+      <html lang="en">
+      <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Children Information</title>
+  <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #3498db;
+            padding: 30px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+
+        th.sortable:hover {
+            background-color: #2980b9;
+        }
+
+        input {
+            width: calc(100% - 20px);
+            box-sizing: border-box;
+            padding: 10px;
+            margin: 5px 0;
+        }
+
+        .nested-table {
+            width: 100%;
+        }
+
+        .nested-table th, .nested-table td {
+            padding: 10px;
+            border: 1px solid #3498db;
+        }
+
+        .subject-row {
+            display: none;
+        }
+
+        .subject-row.visible {
+            display: table-row;
+        }
+
+        #logoutButton {
+            position: fixed;
+            top: 40px;
+            right: 20px;
+            padding: 15px 25px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #logoutButton:hover {
+            background-color: #2980b9;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .child-info {
+            width: 50%;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .child-info h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+
+        .child-info p {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .child-info h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+            color: #3498db;
+        }
+
+        .child-info ul {
+            padding-left: 20px;
+            font-size: 16px;
+            margin-top: 0;
+        }
+
+        .child-info ul li a {
+            color: #3498db;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .child-info ul li a:hover {
+            color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+<button id="logoutButton" onclick="redirectToLoginPage()">Logout</button>
+
+<table id="childTable">
+  <thead>
+  <tr>
+    <th class="sortable">
+      First Name <br>
+      <input type="text" onkeyup="filterTable(0)" placeholder="Filter">
+    </th>
+    <th class="sortable">
+      Last Name <br>
+      <input type="text" onkeyup="filterTable(1)" placeholder="Filter">
+    </th>
+    <th class="sortable">
+      Birthday <br>
+      <input type="text" onkeyup="filterTable(2)" placeholder="Filter">
+    </th>
+    <th class="sortable">
+      Subjects <br>
+      <input type="text" onkeyup="filterTable(3, true)" placeholder="Filter">
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  <!-- Child 1 Information -->
+  <tr>
+    <td><a href="#" onclick="displayChildInfo('John Doe')">John</a></td>
+    <td>Doe</td>
+    <td>2005-05-10</td>
+    <td>
+      <table class="nested-table">
+        <thead>
+        <tr>
+          <th>Subject</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="subject-row visible">
+          <td>Math</td>
+        </tr>
+        <tr class="subject-row visible">
+          <td>Science</td>
+        </tr>
+        <tr class="subject-row visible">
+          <td>English</td>
+        </tr>
+        </tbody>
+      </table>
+    </td>
+  </tr>
+  <!-- Child 2 Information -->
+  <tr>
+    <td><a href="#" onclick="displayChildInfo('Emma Smith')">Emma</a></td>
+    <td>Smith</td>
+    <td>2006-08-25</td>
+    <td>
+      <table class="nested-table">
+        <thead>
+        <tr>
+          <th>Subject</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="subject-row visible">
+          <td>History</td>
+        </tr>
+        <tr class="subject-row visible">
+          <td>Art</td>
+        </tr>
+        </tbody>
+      </table>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<!-- Modal to display child information -->
+<div id="myModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <div id="childInfo"></div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+        function redirectToLoginPage() {
+            // Implement your logic to redirect to the login page here
+            window.location.href = "KSWALogIn.html"
+        }
+
+        function filterTable(columnIndex, isNestedTable = false) {
+            // Implement your filter logic here
+            alert(`Filtering column ${columnIndex}. Nested Table: ${isNestedTable}`);
+        }
+
+        function displayChildInfo(childName) {
+            const childInfo = `
+                <h1>${childName}</h1>
+                <p>Geburtstag: 2005-05-10</p>
+                <h2>Fächer:</h2>
+                <ul>
+                    <li><a href="subject_page.html">Fach 1</a></li>
+                    <li><a href="subject_page.html">Fach 2</a></li>
+                </ul>
+            `;
+
+            const modal = document.getElementById('myModal');
+            const childInfoDiv = document.getElementById('childInfo');
+            childInfoDiv.innerHTML = childInfo;
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('myModal');
+            modal.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
+</title>
+</head>
+<body>
+
+</body>
+</html>
