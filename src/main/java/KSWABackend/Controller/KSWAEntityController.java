@@ -14,9 +14,9 @@ public class KSWAEntityController {
     private List<KSWATest> testList;
 
     public KSWAEntityController() {
-        this.childrenList = new ArrayList<>();
-        this.subjectList = new ArrayList<>();
-        this.testList = new ArrayList<>();
+        this.childrenList = new ArrayList<KSWAChildren>();
+        this.subjectList = new ArrayList<KSWASubject>();
+        this.testList = new ArrayList<KSWATest>();
     }
 
     public void addChildren(KSWAChildren children) {

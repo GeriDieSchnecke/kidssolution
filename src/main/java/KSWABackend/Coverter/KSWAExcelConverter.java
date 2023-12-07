@@ -10,10 +10,116 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class KSWAExcelConverter {
+
+    public static void permanentExcelCommunication() {
+
+        while (true) {
+            List<KSWAChildren> dataFromExcel = readDataFromExcel();
+
+            //TODO: Add data via the interface
+
+            writeDataToExcel(dataFromExcel);
+
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static List<KSWAChildren> readDataFromExcel() {
+        String filePath = System.getProperty("user.dir");
+        List<KSWAChildren> childrenList = new ArrayList<>();
+
+        try (FileInputStream file = new FileInputStream(filePath)) {
+            Workbook workbook = new XSSFWorkbook(file);
+            Sheet sheet = workbook.getSheetAt(0);
+
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0) continue; // Überspringe die Kopfzeile
+
+                KSWAChildren child = new KSWAChildren();
+                child.setId((long) row.getCell(0).getNumericCellValue());
+                child.setChprename(row.getCell(1).getStringCellValue());
+                child.setChname(row.getCell(2).getStringCellValue());
+                child.setChbirthday(row.getCell(3).getStringCellValue());
+
+                List<KSWASubject> subjects = new ArrayList<>();
+                int cellIndex = 4;
+                while (cellIndex < row.getLastCellNum()) {
+                    KSWASubject subject = new KSWASubject();
+                    subject.setSuname(row.getCell(cellIndex++).getStringCellValue());
+                    subject.setSugrade(row.getCell(cellIndex++).getNumericCellValue());
+
+                    ArrayList<KSWATest> tests = new ArrayList<KSWATest>();
+                    while (cellIndex < row.getLastCellNum() && row.getCell(cellIndex) != null) {
+                        KSWATest test = new KSWATest();
+                        test.setTename(row.getCell(cellIndex++).getStringCellValue());
+                        test.setTegrade(row.getCell(cellIndex++).getNumericCellValue());
+                        test.setTefactor(row.getCell(cellIndex++).getNumericCellValue());
+                        test.setTedate(row.getCell(cellIndex++).getDateCellValue());
+
+                        tests.add(test);
+                    }
+                    subject.setTests(tests);
+                    subjects.add(subject);
+                }
+
+                child.setChsubjects(subjects);
+                childrenList.add(child);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return childrenList;
+    }
+
+    public static void writeDataToExcel(List<KSWAChildren> childrenList) {
+        String projectDirectory = System.getProperty("user.dir");
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("KSWA Data");
+
+        int rowIndex = 0;
+        for (KSWAChildren child : childrenList) {
+            Row row = sheet.createRow(rowIndex++);
+
+            row.createCell(0).setCellValue(child.getId());
+            row.createCell(1).setCellValue(child.getChprename());
+            row.createCell(2).setCellValue(child.getChname());
+            row.createCell(3).setCellValue(child.getChbirthday());
+
+            List<KSWASubject> subjects = child.getChsubjects();
+            if (subjects != null && !subjects.isEmpty()) {
+                int cellIndex = 4;
+                for (KSWASubject subject : subjects) {
+                    row.createCell(cellIndex++).setCellValue(subject.getSuname());
+                    row.createCell(cellIndex++).setCellValue(subject.getSugrade());
+
+                    List<KSWATest> tests = subject.getTests();
+                    if (tests != null && !tests.isEmpty()) {
+                        for (KSWATest test : tests) {
+                            row.createCell(cellIndex++).setCellValue(test.getTename());
+                            row.createCell(cellIndex++).setCellValue(test.getTegrade());
+                            row.createCell(cellIndex++).setCellValue(test.getTefactor());
+                            row.createCell(cellIndex++).setCellValue(test.getTedate().toString()); // Konvertierung des Datums in String
+                        }
+                    }
+                }
+            }
+        }
+
+        try (FileOutputStream fileOut = new FileOutputStream(projectDirectory)) {
+            workbook.write(fileOut);
+            System.out.println("Excel file has been created successfully!");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void exportExcel(List<KSWAChildren> childrenList, String filePath) {
         Workbook workbook = new XSSFWorkbook();
@@ -73,81 +179,4 @@ public class KSWAExcelConverter {
             e.printStackTrace();
         }
     }
-
-    public static List<KSWAChildren> importExcel(String filePath) {
-        List<KSWAChildren> childrenList = new ArrayList<>();
-
-        try (FileInputStream file = new FileInputStream(filePath)) {
-            Workbook workbook = new XSSFWorkbook(file);
-            Sheet sheet = workbook.getSheetAt(0);
-
-            for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue; // Skip header row
-
-                KSWAChildren child = new KSWAChildren();
-                child.setId((long) row.getCell(0).getNumericCellValue());
-                child.setChprename(row.getCell(1).getStringCellValue());
-                child.setChname(row.getCell(2).getStringCellValue());
-                child.setChbirthday(row.getCell(3).getStringCellValue());
-
-                List<KSWASubject> subjects = new ArrayList<>();
-                KSWASubject subject = new KSWASubject();
-                subject.setSuname(row.getCell(4).getStringCellValue()); // Subject name from Excel
-                subject.setSugrade(row.getCell(5).getNumericCellValue()); // Subject grade from Excel
-
-                List<KSWATest> tests = new ArrayList<>();
-                KSWATest test = new KSWATest();
-                test.setTename(row.getCell(6).getStringCellValue()); // Test name from Excel
-                test.setTegrade(row.getCell(7).getNumericCellValue()); // Test grade from Excel
-                test.setTefactor(row.getCell(8).getNumericCellValue()); // Test factor from Excel
-                // test.setTedate(); // You need to handle date parsing from Excel cell to Date object
-
-                tests.add(test);
-                subject.setTests((ArrayList<KSWATest>) tests);
-                subjects.add(subject);
-
-                child.setChsubjects(subjects);
-
-                childrenList.add(child);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return childrenList;
-    }
-
-    //TODO: Remove its just for testing.
-    public static void main(String[] args) {
-        KSWAChildren child1 = new KSWAChildren("Max", "Mustermann", "2008-05-20", null);
-        child1.setId(1L);
-        List<KSWASubject> child1Subjects = new ArrayList<>();
-
-        KSWATest test1 = new KSWATest(85.0, "Math Test 1", 0.5, new Date(), 1);
-        KSWATest test2 = new KSWATest(75.0, "Math Test 2", 0.5, new Date(), 2);
-        List<KSWATest> mathTests = new ArrayList<>(List.of(test1, test2));
-        KSWASubject mathSubject = new KSWASubject("Math", 80.0, (ArrayList<KSWATest>) mathTests, 1);
-        child1Subjects.add(mathSubject);
-
-        KSWATest test3 = new KSWATest(70.0, "Science Test 1", 0.5, new Date(), 3);
-        KSWATest test4 = new KSWATest(65.0, "Science Test 2", 0.5, new Date(), 4);
-        List<KSWATest> scienceTests = new ArrayList<>(List.of(test3, test4));
-        KSWASubject scienceSubject = new KSWASubject("Science", 67.5, (ArrayList<KSWATest>) scienceTests, 2);
-        child1Subjects.add(scienceSubject);
-
-        child1.setChsubjects(child1Subjects);
-
-        List<KSWAChildren> childrenList = new ArrayList<>(List.of(child1));
-
-        String desktopPath = System.getProperty("user.home") + "/Desktop/";
-        String filePath = desktopPath + "output.xlsx";
-
-        exportExcel(childrenList, filePath);
-
-        String newdesktopPath = System.getProperty("user.home") + "/Desktop/";
-        String newfilePath = newdesktopPath + "input.xlsx";
-
-        List<KSWAChildren> importedData = importExcel(newfilePath);
-    }
-
 }
