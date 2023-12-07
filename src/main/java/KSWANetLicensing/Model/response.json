@@ -1,0 +1,86 @@
+{
+  "signature": null,
+  "infos": {
+    "info": []
+  },
+  "items": {
+    "item": [
+      {
+        "property": [
+          {
+            "value": "MKSZ5MFZQ",
+            "name": "productModuleNumber"
+          },
+          {
+            "value": "true",
+            "name": "valid"
+          },
+          {
+            "value": "Payment Module",
+            "name": "productModuleName"
+          },
+          {
+            "value": "GREEN",
+            "name": "warningLevel"
+          },
+          {
+            "value": "MultiFeature",
+            "name": "licensingModel"
+          }
+        ],
+        "list": [
+          {
+            "property": [
+              {
+                "value": "false",
+                "name": "valid"
+              },
+              {
+                "value": "Sync",
+                "name": "featureName"
+              }
+            ],
+            "list": [],
+            "name": "EZZWKZHYN"
+          },
+          {
+            "property": [
+              {
+                "value": "true",
+                "name": "valid"
+              },
+              {
+                "value": "Save entrys",
+                "name": "featureName"
+              }
+            ],
+            "list": [],
+            "name": "E9M69Z7NK"
+          },
+          {
+            "property": [
+              {
+                "value": "false",
+                "name": "valid"
+              },
+              {
+                "value": "Add entrys",
+                "name": "featureName"
+              }
+            ],
+            "list": [],
+            "name": "EKJ5IZCPD"
+          }
+        ],
+        "type": "ProductModuleValidation"
+      }
+    ],
+    "pagenumber": null,
+    "itemsnumber": null,
+    "totalpages": null,
+    "totalitems": null,
+    "hasnext": null
+  },
+  "id": null,
+  "ttl": "2024-11-16T16:55:05.116Z"
+}
