@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <title><!DOCTYPE html>
+    <html lang="en">
+    <head>
     <meta charset="UTF-8">
-    <title><!DOCTYPE html>
-      <html lang="en">
-      <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Children Information</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Children Information</title>
   <style>
         body {
             font-family: Arial, sans-serif;
@@ -67,20 +67,47 @@
             display: table-row;
         }
 
-        #logoutButton {
-            position: fixed;
-            top: 40px;
-            right: 20px;
-            padding: 15px 25px;
-            background-color: #3498db;
-            color: white;
+        /* CSS für die spezifischen Buttons */
+        #excelInput,
+        #downloadExcelButton,
+        #uploadExcelButton,
+        #logoutButton,
+        input[type="file"] {
+            padding: 10px 20px;
+            margin: 5px;
             border: none;
             cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            background-color: #3498db;
+            color: white;
+            transition: background-color 0.3s ease;
         }
 
-        #logoutButton:hover {
+        #excelInput:hover,
+        #downloadExcelButton:hover,
+        #uploadExcelButton:hover,
+        #logoutButton:hover,
+        input[type="file"]:hover {
             background-color: #2980b9;
         }
+
+        input[type="file"] {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        /* Neuer CSS für die Button-Anordnung */
+        .buttons-container {
+            display: flex; /* Container als Flexbox anzeigen */
+            justify-content: space-between; /* Buttons gleichmäßig auf der Hauptachse verteilen */
+            width: 100%; /* Container auf die volle Breite des Elternelements ausdehnen */
+            max-width: 800px; /* Maximalbreite des Containers */
+            margin-top: 20px; /* Abstand nach oben */
+        }
+
 
         .modal {
             display: none;
@@ -163,7 +190,9 @@
 </head>
 <body>
 <button id="logoutButton" onclick="redirectToLoginPage()">Logout</button>
-
+<input type="file" id="excelInput" accept=".xlsx">
+<button id="downloadExcelButton" onclick="exportToExcel()">Excel herunterladen</button>
+<button id="uploadExcelButton" onclick="uploadExcel()">Excel hochladen</button>
 <table id="childTable">
   <thead>
   <tr>
@@ -279,12 +308,38 @@
             const modal = document.getElementById('myModal');
             modal.style.display = 'none';
         }
-    </script>
-</body>
-</html>
-</title>
-</head>
-<body>
 
+        function uploadExcel() {
+            const input = document.getElementById('excelInput');
+            const file = input.files[0];
+
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                fetch('your_upload_endpoint', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    console.log('Datei erfolgreich hochgeladen:', response);
+                    // Hier kannst du weitere Aktionen nach dem erfolgreichen Upload durchführen
+                })
+                .catch(error => {
+                    console.error('Fehler beim Hochladen der Datei:', error);
+                    // Hier kannst du Fehlerbehandlungen für den Upload implementieren
+                });
+            } else {
+                alert('Bitte wähle eine Datei zum Hochladen aus.');
+            }
+        }
+
+        function exportToExcel() {
+            // Ändere die URL auf den Endpunkt deines Servers, der die Excel-Datei zurückgibt
+            window.location.href = '/download-excel'; // Passe dies an deine Backend-Route an
+        }
+
+
+</script>
 </body>
 </html>

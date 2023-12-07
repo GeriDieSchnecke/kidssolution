@@ -5,14 +5,12 @@ import java.util.List;
 
 public class KSWAChildren {
     private Long id;
-
     private String chprename;
     private String chname;
     private String chbirthday;
+    private List<KSWASubject> chsubjects;
 
-    private List<String> chsubjects;
-
-    public KSWAChildren(String chprename, String chname, String chbirthday, ArrayList<String> chsubjects) {
+    public KSWAChildren(String chprename, String chname, String chbirthday, ArrayList<KSWASubject> chsubjects) {
         this.chprename = chprename;
         this.chname = chname;
         this.chbirthday = chbirthday;
@@ -54,12 +52,13 @@ public class KSWAChildren {
         this.chbirthday = chbirthday;
     }
 
-    public List<String> getChsubjects() {
+    public List<KSWASubject> getChsubjects() {
         return chsubjects;
     }
 
-    public void setChsubjects(List<String> chsubjects) {
+    public void setChsubjects(List<KSWASubject> chsubjects) {
         this.chsubjects = chsubjects;
     }
+
 }
 
