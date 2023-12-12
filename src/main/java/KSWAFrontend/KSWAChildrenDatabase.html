@@ -2,197 +2,186 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title><!DOCTYPE html>
-    <html lang="en">
-    <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Children Information</title>
+  <title>Children Information</title>
   <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f0f0f0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-            background-color: white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-        }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+        background-color: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+    }
 
-        th, td {
-            border: 1px solid #3498db;
-            padding: 30px;
-            text-align: left;
-            vertical-align: top;
-        }
+    th, td {
+        border: 1px solid #3498db;
+        padding: 30px;
+        text-align: left;
+        vertical-align: top;
+    }
 
-        th {
-            background-color: #3498db;
-            color: white;
-        }
+    th {
+        background-color: #3498db;
+        color: white;
+    }
 
-        th.sortable:hover {
-            background-color: #2980b9;
-        }
+    th.sortable:hover {
+        background-color: #2980b9;
+    }
 
-        input {
-            width: calc(100% - 20px);
-            box-sizing: border-box;
-            padding: 10px;
-            margin: 5px 0;
-        }
+    input {
+        width: calc(100% - 20px);
+        box-sizing: border-box;
+        padding: 10px;
+        margin: 5px 0;
+    }
 
-        .nested-table {
-            width: 100%;
-        }
+    .nested-table {
+        width: 100%;
+    }
 
-        .nested-table th, .nested-table td {
-            padding: 10px;
-            border: 1px solid #3498db;
-        }
+    .nested-table th, .nested-table td {
+        padding: 10px;
+        border: 1px solid #3498db;
+    }
 
-        .subject-row {
-            display: none;
-        }
+    .subject-row {
+        display: none;
+    }
 
-        .subject-row.visible {
-            display: table-row;
-        }
+    .subject-row.visible {
+        display: table-row;
+    }
 
-        /* CSS für die spezifischen Buttons */
-        #excelInput,
-        #downloadExcelButton,
-        #uploadExcelButton,
-        #logoutButton,
-        input[type="file"] {
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            border-radius: 5px;
-            background-color: #3498db;
-            color: white;
-            transition: background-color 0.3s ease;
-        }
+    /* CSS für die spezifischen Buttons */
+    #downloadExcelButton,
+    #logoutButton,
+    input[type="file"] {
+        padding: 10px 20px;
+        margin: 5px;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 5px;
+        background-color: #3498db;
+        color: white;
+        transition: background-color 0.3s ease;
+    }
 
-        #excelInput:hover,
-        #downloadExcelButton:hover,
-        #uploadExcelButton:hover,
-        #logoutButton:hover,
-        input[type="file"]:hover {
-            background-color: #2980b9;
-        }
+    #downloadExcelButton:hover,
+    #logoutButton:hover,
+    input[type="file"]:hover {
+        background-color: #2980b9;
+    }
 
-        input[type="file"] {
-            padding: 10px;
-            margin: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
+    input[type="file"] {
+        padding: 10px;
+        margin: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
 
-        /* Neuer CSS für die Button-Anordnung */
-        .buttons-container {
-            display: flex; /* Container als Flexbox anzeigen */
-            justify-content: space-between; /* Buttons gleichmäßig auf der Hauptachse verteilen */
-            width: 100%; /* Container auf die volle Breite des Elternelements ausdehnen */
-            max-width: 800px; /* Maximalbreite des Containers */
-            margin-top: 20px; /* Abstand nach oben */
-        }
+    /* Neuer CSS für die Button-Anordnung */
+    .buttons-container {
+        display: flex; /* Container als Flexbox anzeigen */
+        justify-content: space-between; /* Buttons gleichmäßig auf der Hauptachse verteilen */
+        width: 100%; /* Container auf die volle Breite des Elternelements ausdehnen */
+        max-width: 800px; /* Maximalbreite des Containers */
+        margin-top: 20px; /* Abstand nach oben */
+    }
 
 
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
-            padding-top: 60px;
-        }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+        padding-top: 60px;
+    }
 
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-        }
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+    }
 
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
 
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
 
-        .child-info {
-            width: 50%;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-            border-radius: 10px;
-            text-align: left;
-        }
+    .child-info {
+        width: 50%;
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+        border-radius: 10px;
+        text-align: left;
+    }
 
-        .child-info h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: #3498db;
-        }
+    .child-info h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+        color: #3498db;
+    }
 
-        .child-info p {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
+    .child-info p {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
 
-        .child-info h2 {
-            font-size: 20px;
-            margin-bottom: 5px;
-            color: #3498db;
-        }
+    .child-info h2 {
+        font-size: 20px;
+        margin-bottom: 5px;
+        color: #3498db;
+    }
 
-        .child-info ul {
-            padding-left: 20px;
-            font-size: 16px;
-            margin-top: 0;
-        }
+    .child-info ul {
+        padding-left: 20px;
+        font-size: 16px;
+        margin-top: 0;
+    }
 
-        .child-info ul li a {
-            color: #3498db;
-            text-decoration: underline;
-            cursor: pointer;
-        }
+    .child-info ul li a {
+        color: #3498db;
+        text-decoration: underline;
+        cursor: pointer;
+    }
 
-        .child-info ul li a:hover {
-            color: #2980b9;
-        }
-    </style>
+    .child-info ul li a:hover {
+        color: #2980b9;
+    }
+  </style>
 </head>
 <body>
 <button id="logoutButton" onclick="redirectToLoginPage()">Logout</button>
-<input type="file" id="excelInput" accept=".xlsx">
 <button id="downloadExcelButton" onclick="exportToExcel()">Excel herunterladen</button>
-<button id="uploadExcelButton" onclick="uploadExcel()">Excel hochladen</button>
 <table id="childTable">
   <thead>
   <tr>
@@ -214,60 +203,9 @@
     </th>
   </tr>
   </thead>
-  <tbody>
-  <!-- Child 1 Information -->
-  <tr>
-    <td><a href="#" onclick="displayChildInfo('John Doe')">John</a></td>
-    <td>Doe</td>
-    <td>2005-05-10</td>
-    <td>
-      <table class="nested-table">
-        <thead>
-        <tr>
-          <th>Subject</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr class="subject-row visible">
-          <td>Math</td>
-        </tr>
-        <tr class="subject-row visible">
-          <td>Science</td>
-        </tr>
-        <tr class="subject-row visible">
-          <td>English</td>
-        </tr>
-        </tbody>
-      </table>
-    </td>
-  </tr>
-  <!-- Child 2 Information -->
-  <tr>
-    <td><a href="#" onclick="displayChildInfo('Emma Smith')">Emma</a></td>
-    <td>Smith</td>
-    <td>2006-08-25</td>
-    <td>
-      <table class="nested-table">
-        <thead>
-        <tr>
-          <th>Subject</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr class="subject-row visible">
-          <td>History</td>
-        </tr>
-        <tr class="subject-row visible">
-          <td>Art</td>
-        </tr>
-        </tbody>
-      </table>
-    </td>
-  </tr>
-  </tbody>
+  <tbody></tbody>
 </table>
 
-<!-- Modal to display child information -->
 <div id="myModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal()">&times;</span>
@@ -277,69 +215,131 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-        function redirectToLoginPage() {
-            // Implement your logic to redirect to the login page here
-            window.location.href = "KSWALogIn.html"
+    function redirectToLoginPage() {
+      // Implementieren Sie die Weiterleitung zur Login-Seite
+      window.location.href = "KSWALogIn.html";
+    }
+
+    function filterTable(columnIndex, isNestedTable = false) {
+      const input = document.querySelectorAll('input[type="text"]')[columnIndex];
+      const filterValue = input.value.toUpperCase();
+      const table = document.getElementById('childTable');
+      const rows = table.getElementsByTagName('tr');
+
+      for (let i = 0; i < rows.length; i++) {
+          let shouldShowRow = false;
+          const cells = rows[i].getElementsByTagName('td');
+
+          if (cells.length > columnIndex) {
+              const cellValue = isNestedTable ? cells[columnIndex].querySelector('table').innerText.toUpperCase() : cells[columnIndex].innerText.toUpperCase();
+
+              if (cellValue.indexOf(filterValue) > -1) {
+                  shouldShowRow = true;
+              }
+          }
+
+          if (shouldShowRow) {
+              rows[i].style.display = '';
+          } else {
+              rows[i].style.display = 'none';
+          }
+      }
+    }
+
+    function closeModal() {
+      // Implementieren Sie die Logik zum Schließen des Modals
+      const modal = document.getElementById('myModal');
+      modal.style.display = 'none';
+    }
+
+    function exportToExcel() {
+        const filePath = prompt("Bitte geben Sie den Dateipfad ein:", 'your/file/path'); // Hier öffnet sich ein Eingabefeld für den Dateipfad
+
+        if (filePath) { // Überprüfen, ob ein Dateipfad eingegeben wurde
+            fetch('/children/export?filePath=' + filePath, {
+                method: 'GET'
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                }
+                throw new Error('Network response was not ok.');
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'exported_file.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            })
+            .catch(error => {
+                console.error('Fehler beim Exportieren nach Excel:', error);
+            });
+        } else {
+            console.log('Kein Dateipfad eingegeben.');
         }
-
-        function filterTable(columnIndex, isNestedTable = false) {
-            // Implement your filter logic here
-            alert(`Filtering column ${columnIndex}. Nested Table: ${isNestedTable}`);
-        }
-
-        function displayChildInfo(childName) {
-            const childInfo = `
-                <h1>${childName}</h1>
-                <p>Geburtstag: 2005-05-10</p>
-                <h2>Fächer:</h2>
-                <ul>
-                    <li><a href="subject_page.html">Fach 1</a></li>
-                    <li><a href="subject_page.html">Fach 2</a></li>
-                </ul>
-            `;
-
-            const modal = document.getElementById('myModal');
-            const childInfoDiv = document.getElementById('childInfo');
-            childInfoDiv.innerHTML = childInfo;
-            modal.style.display = 'block';
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('myModal');
-            modal.style.display = 'none';
-        }
-
-        function uploadExcel() {
-            const input = document.getElementById('excelInput');
-            const file = input.files[0];
-
-            if (file) {
-                const formData = new FormData();
-                formData.append('file', file);
-
-                fetch('your_upload_endpoint', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    console.log('Datei erfolgreich hochgeladen:', response);
-                    // Hier kannst du weitere Aktionen nach dem erfolgreichen Upload durchführen
-                })
-                .catch(error => {
-                    console.error('Fehler beim Hochladen der Datei:', error);
-                    // Hier kannst du Fehlerbehandlungen für den Upload implementieren
-                });
-            } else {
-                alert('Bitte wähle eine Datei zum Hochladen aus.');
-            }
-        }
-
-        function exportToExcel() {
-            // Ändere die URL auf den Endpunkt deines Servers, der die Excel-Datei zurückgibt
-            window.location.href = '/download-excel'; // Passe dies an deine Backend-Route an
-        }
+    }
 
 
-</script>
+    function fetchDataFromBackend() {
+      // Funktion zum Abrufen von Daten vom Backend
+      fetch('/children', {
+        method: 'GET'
+      })
+      .then(response => response.json())
+      .then(childrenData => {
+        const childTableBody = document.querySelector('#childTable tbody');
+
+        childrenData.forEach(child => {
+          const row = document.createElement('tr');
+
+          const firstNameCell = document.createElement('td');
+          const link = document.createElement('a');
+          link.href = "#";
+          link.textContent = child.firstName; // Ändern Sie das Attribut entsprechend Ihrem Datenmodell
+          link.onclick = () => displayChildInfo(child.firstName); // Ändern Sie den Namen entsprechend Ihrem Datenmodell
+          firstNameCell.appendChild(link);
+
+          const lastNameCell = document.createElement('td');
+          lastNameCell.textContent = child.lastName; // Ändern Sie das Attribut entsprechend Ihrem Datenmodell
+
+          const birthdayCell = document.createElement('td');
+          birthdayCell.textContent = child.birthday; // Ändern Sie das Attribut entsprechend Ihrem Datenmodell
+
+          const subjectsCell = document.createElement('td');
+          const nestedTable = document.createElement('table');
+          const nestedTableBody = document.createElement('tbody');
+
+          // Fügen Sie die Untertabelle für die Fächer hinzu (falls erforderlich)
+          // Beispiel:
+          child.subjects.forEach(subject => {
+            const subjectRow = document.createElement('tr');
+            const subjectData = document.createElement('td');
+            subjectData.textContent = subject;
+            subjectRow.appendChild(subjectData);
+            nestedTableBody.appendChild(subjectRow);
+          });
+
+          nestedTable.appendChild(nestedTableBody);
+          subjectsCell.appendChild(nestedTable);
+
+          row.appendChild(firstNameCell);
+          row.appendChild(lastNameCell);
+          row.appendChild(birthdayCell);
+          row.appendChild(subjectsCell);
+
+          childTableBody.appendChild(row);
+        });
+      })
+      .catch(error => {
+        console.error('Fehler beim Abrufen der Daten:', error);
+      });
+    }
+
+    // Laden der Daten beim Laden der Seite
+    window.onload = fetchDataFromBackend;
+  </script>
 </body>
 </html>

@@ -5,31 +5,39 @@ import KSWABackend.Model.KSWASubject;
 import KSWABackend.Model.KSWATest;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+@RestController
+@RequestMapping("/api/kswa")
 public class KSWAExcelConverter {
 
-    public static void permanentExcelCommunication() {
 
-        while (true) {
-            List<KSWAChildren> dataFromExcel = readDataFromExcel();
-
-            //TODO: Add data via the interface
-
-            writeDataToExcel(dataFromExcel);
-
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+    @GetMapping("/children")
+    public ResponseEntity<List<KSWAChildren>> getChildrenData() {
+        List<KSWAChildren> childrenData = readDataFromExcel();
+        return new ResponseEntity<>(childrenData, HttpStatus.OK);
     }
+
+    @PostMapping("/children/write")
+    public ResponseEntity<String> writeDataToExcel(@RequestBody List<KSWAChildren> childrenList) {
+        writeToExcel(childrenList);
+        return new ResponseEntity<>("Excel file has been created successfully!", HttpStatus.CREATED);
+    }
+
+    @GetMapping("/children/export")
+    public ResponseEntity<String> exportExcel(@RequestParam String filePath) {
+        List<KSWAChildren> childrenList = readDataFromExcel();
+        exportExcel(childrenList, filePath);
+        return new ResponseEntity<>("Excel file has been exported successfully!", HttpStatus.OK);
+    }
+
 
     public static List<KSWAChildren> readDataFromExcel() {
         String filePath = System.getProperty("user.dir");
@@ -40,7 +48,7 @@ public class KSWAExcelConverter {
             Sheet sheet = workbook.getSheetAt(0);
 
             for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue; // Überspringe die Kopfzeile
+                if (row.getRowNum() == 0) continue;
 
                 KSWAChildren child = new KSWAChildren();
                 child.setId((long) row.getCell(0).getNumericCellValue());
@@ -79,7 +87,7 @@ public class KSWAExcelConverter {
         return childrenList;
     }
 
-    public static void writeDataToExcel(List<KSWAChildren> childrenList) {
+    public static void writeToExcel(List<KSWAChildren> childrenList) {
         String projectDirectory = System.getProperty("user.dir");
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("KSWA Data");
@@ -179,4 +187,5 @@ public class KSWAExcelConverter {
             e.printStackTrace();
         }
     }
+
 }

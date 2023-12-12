@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>KSWA Children Information</title>
+  <style>
+    /* Stile für die Anzeige der Kinderdaten */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th, td {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    /* Stile für das Hinzufügen neuer Kinder */
+    #addForm {
+      margin-bottom: 20px;
+    }
+
+    #addForm input[type="text"],
+    #addForm input[type="date"] {
+      padding: 8px;
+      margin-right: 10px;
+    }
+
+    #addForm input[type="submit"] {
+      padding: 8px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<!-- Formular zum Hinzufügen neuer Kinder -->
+<form id="addForm">
+  <input type="text" id="prename" placeholder="Vorname" required>
+  <input type="text" id="name" placeholder="Nachname" required>
+  <input type="date" id="birthday" required>
+  <input type="submit" value="Kind hinzufügen">
+</form>
+
+<!-- Tabelle zur Anzeige von Kinderdaten -->
+<table id="childTable">
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Vorname</th>
+    <th>Nachname</th>
+    <th>Geburtstag</th>
+  </tr>
+  </thead>
+  <tbody id="tableBody">
+  <!-- Hier werden die Kinderdaten angezeigt -->
+  </tbody>
+</table>
+
+<script>
+    // Funktion zum Hinzufügen von Kindern (Simulierte AJAX-Anfrage)
+    document.getElementById("addForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      // Hier sollte die Logik zur Verarbeitung der Daten und zum Senden an das Backend stehen
+      const prename = document.getElementById("prename").value;
+      const name = document.getElementById("name").value;
+      const birthday = document.getElementById("birthday").value;
+
+      // Simulieren einer POST-Anfrage an den Backend-Endpunkt zum Hinzufügen eines neuen Kindes
+      // Hier würde normalerweise eine AJAX-Anfrage an das Backend gesendet werden
+      // Das folgende ist nur eine Simulation und wird nicht funktionieren, es sei denn, es gibt einen entsprechenden Endpunkt im Backend
+      fetch('https://dein-backend-endpunkt.de/kswa/addChild', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prename, name, birthday }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Hier könnte Logik stehen, um die Antwort zu verarbeiten (z. B. das Hinzufügen des neuen Kindes zur Tabelle)
+        console.log('Antwort vom Backend:', data);
+      })
+      .catch((error) => {
+        console.error('Fehler:', error);
+      });
+    });
+
+    // Funktion zum Abrufen und Anzeigen von Kindern (Simulierte AJAX-Anfrage)
+    function displayChildren() {
+      // Simulieren einer GET-Anfrage an den Backend-Endpunkt zum Abrufen von Kindern
+      // Hier würde normalerweise eine AJAX-Anfrage an das Backend gesendet werden, um die vorhandenen Kinder abzurufen
+      // Das folgende ist nur eine Simulation und wird nicht funktionieren, es sei denn, es gibt einen entsprechenden Endpunkt im Backend
+      fetch('https://dein-backend-endpunkt.de/kswa/getChildren')
+      .then(response => response.json())
+      .then(data => {
+        const tableBody = document.getElementById('tableBody');
+        tableBody.innerHTML = ''; // Löscht vorherige Einträge aus der Tabelle
+
+        // Iteriere durch die erhaltenen Daten und füge sie in die Tabelle ein
+        data.forEach(child => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${child.id}</td>
+            <td>${child.chprename}</td>
+            <td>${child.chname}</td>
+            <td>${child.chbirthday}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      })
+      .catch((error) => {
+        console.error('Fehler:', error);
+      });
+    }
+
+    // Nach dem Laden der Seite die vorhandenen Kinder anzeigen
+    displayChildren();
+  </script>
+</body>
+</html>
