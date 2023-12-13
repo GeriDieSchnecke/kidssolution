@@ -20,6 +20,14 @@ public class KSWAChildren {
     public KSWAChildren() {
     }
 
+    public KSWAChildren(String id, String firstName, String lastName, String birthday, Object o) {
+        this.id = Long.valueOf(id);
+        this.chprename = firstName;
+        this.chname = lastName;
+        this.chbirthday = birthday;
+        this.chsubjects = new ArrayList<>();
+    }
+
     public Long getId() {
         return id;
     }

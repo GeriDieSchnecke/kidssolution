@@ -5,38 +5,13 @@ import KSWABackend.Model.KSWASubject;
 import KSWABackend.Model.KSWATest;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/kswa")
 public class KSWAExcelConverter {
-
-
-    @GetMapping("/children")
-    public ResponseEntity<List<KSWAChildren>> getChildrenData() {
-        List<KSWAChildren> childrenData = readDataFromExcel();
-        return new ResponseEntity<>(childrenData, HttpStatus.OK);
-    }
-
-    @PostMapping("/children/write")
-    public ResponseEntity<String> writeDataToExcel(@RequestBody List<KSWAChildren> childrenList) {
-        writeToExcel(childrenList);
-        return new ResponseEntity<>("Excel file has been created successfully!", HttpStatus.CREATED);
-    }
-
-    @GetMapping("/children/export")
-    public ResponseEntity<String> exportExcel(@RequestParam String filePath) {
-        List<KSWAChildren> childrenList = readDataFromExcel();
-        exportExcel(childrenList, filePath);
-        return new ResponseEntity<>("Excel file has been exported successfully!", HttpStatus.OK);
-    }
 
 
     public static List<KSWAChildren> readDataFromExcel() {
