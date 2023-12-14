@@ -12,12 +12,13 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Date;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.*;
 import java.util.List;
-import java.util.TimerTask;
 
 public class KSWAApplicationGUI extends JFrame {
+    private LoginGUI loginGUI;
     private JTable childrenTable;
     private JTable subjectsTable;
     private DefaultTableModel childrenTableModel;
@@ -25,24 +26,114 @@ public class KSWAApplicationGUI extends JFrame {
     private DefaultTableModel testsTableModel;
     private final List<KSWAChildren> childrenList = new ArrayList<>();
     private JPanel mainPanel;
-    private Timer timer;
+    private javax.swing.Timer timer;
 
-    public KSWAApplicationGUI() {
+    private Map<String, String> userCredentials; // Eine temporäre Speicherung von Benutzerdaten
+    private boolean isLoggedIn;
+    private JButton logoutButton;
+
+    public KSWAApplicationGUI(LoginGUI loginGUI) {
+        userCredentials = new HashMap<>();
+        isLoggedIn = false;
+        this.loginGUI = loginGUI;
         initializeUI();
         // Initialisierung des Timers, der alle 10 Sekunden ausgeführt wird
-        timer = new Timer(1);
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                // Lese- und Schreiboperationen hier durchführen
-                List<KSWAChildren> childrenList = KSWAExcelConverter.readDataFromExcel();
-                // Hier könnten Sie die Daten bearbeiten
-
-                KSWAExcelConverter.writeToExcel(childrenList); // oder exportExcel() je nach Bedarf
-            }
-        }, 0, 10000);
+        scheduleDataUpdates();
         displayChildrenData();
         addShowGradesChartButton();
+        addLoginAndRegisterComponents();
+    }
+
+    private void scheduleDataUpdates() {
+        int delay = 0; // Starte sofort
+        int interval = 10000; // Wiederhole alle 10 Sekunden
+
+        timer = new javax.swing.Timer(interval, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Hier werden Lese- und Schreiboperationen durchgeführt
+                List<KSWAChildren> childrenList = KSWAExcelConverter.readDataFromExcel();
+                // Hier könntest du Daten bearbeiten
+
+                KSWAExcelConverter.writeToExcel(childrenList); // oder exportExcel(), je nach Bedarf
+            }
+        });
+
+        timer.setInitialDelay(delay);
+        timer.start();
+    }
+    private void addLoginAndRegisterComponents() {
+        JButton loginButton = createStyledButton("Login", Color.YELLOW);
+        JButton registerButton = createStyledButton("Register", Color.CYAN);
+
+        loginButton.addActionListener(e -> showLoginDialog());
+        registerButton.addActionListener(e -> showRegisterDialog());
+
+        JPanel loginPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        loginPanel.add(loginButton);
+        loginPanel.add(registerButton);
+        loginPanel.setBackground(new Color(200, 200, 200));
+        loginPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        mainPanel.add(loginPanel, BorderLayout.NORTH);
+    }
+
+    private void showLoginDialog() {
+        if (!isLoggedIn) {
+            String username = JOptionPane.showInputDialog("Enter Username:");
+            String password = JOptionPane.showInputDialog("Enter Password:");
+
+            if (validateUserCredentials(username, password)) {
+                isLoggedIn = true;
+                JOptionPane.showMessageDialog(null, "Login Successful!");
+                // Hier kannst du weitere Aktionen nach erfolgreichem Login ausführen
+                if (logoutButton != null) {
+                    logoutButton.setEnabled(true);
+                } else {
+                    addLogoutButton();
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Invalid Username or Password!");
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "You are already logged in!");
+        }
+    }
+
+    private boolean validateUserCredentials(String username, String password) {
+        // Hier würdest du normalerweise die eingegebenen Anmeldeinformationen mit einer Datenbank oder einem anderen Speicherort vergleichen
+        // Hier ist ein Beispiel mit fest codierten Anmeldeinformationen
+        userCredentials.put("exampleUser", "examplePassword");
+        return userCredentials.containsKey(username) && userCredentials.get(username).equals(password);
+    }
+
+    private void showRegisterDialog() {
+        String newUsername = JOptionPane.showInputDialog("Enter New Username:");
+        String newPassword = JOptionPane.showInputDialog("Enter New Password:");
+
+        if (newUsername != null && newPassword != null && !newUsername.isEmpty() && !newPassword.isEmpty()) {
+            userCredentials.put(newUsername, newPassword);
+            JOptionPane.showMessageDialog(null, "Registration Successful!");
+        } else {
+            JOptionPane.showMessageDialog(null, "Invalid Username or Password!");
+        }
+    }
+
+    private void addLogoutButton() {
+        logoutButton = createStyledButton("Logout", Color.MAGENTA);
+        logoutButton.setEnabled(false);
+        logoutButton.addActionListener(e -> performLogout());
+
+        JPanel buttonPanel = (JPanel) ((BorderLayout) mainPanel.getLayout()).getLayoutComponent(BorderLayout.SOUTH);
+        buttonPanel.add(logoutButton);
+        buttonPanel.revalidate();
+    }
+
+    private void performLogout() {
+        isLoggedIn = false;
+        JOptionPane.showMessageDialog(null, "Logged out successfully!");
+        logoutButton.setEnabled(false);
+        // Hier könntest du andere notwendige Aktionen nach dem Logout ausführen
     }
 
     private void addShowGradesChartButton() {
@@ -348,13 +439,15 @@ public class KSWAApplicationGUI extends JFrame {
         }
     }
 
-    public static void main(String[] args) {
+
+    public void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        SwingUtilities.invokeLater(KSWAApplicationGUI::new);
+        SwingUtilities.invokeLater(() -> new KSWAApplicationGUI(new LoginGUI(this)));
     }
 }
+
