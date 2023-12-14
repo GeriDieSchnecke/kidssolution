@@ -3,6 +3,7 @@ package KSWABackend;
 import KSWABackend.Coverter.KSWAExcelConverter;
 import KSWABackend.Model.KSWAChildren;
 import KSWABackend.Model.KSWASubject;
+import KSWABackend.Model.KSWATeacher;
 import KSWABackend.Model.KSWATest;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -10,15 +11,16 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.*;
 import java.util.List;
 
 public class KSWAApplicationGUI extends JFrame {
-    private LoginGUI loginGUI;
     private JTable childrenTable;
     private JTable subjectsTable;
     private DefaultTableModel childrenTableModel;
@@ -32,16 +34,108 @@ public class KSWAApplicationGUI extends JFrame {
     private boolean isLoggedIn;
     private JButton logoutButton;
 
-    public KSWAApplicationGUI(LoginGUI loginGUI) {
+    private KSWATeacher currentTeacher;
+
+    public KSWAApplicationGUI() {
         userCredentials = new HashMap<>();
         isLoggedIn = false;
-        this.loginGUI = loginGUI;
         initializeUI();
         // Initialisierung des Timers, der alle 10 Sekunden ausgeführt wird
         scheduleDataUpdates();
         displayChildrenData();
         addShowGradesChartButton();
         addLoginAndRegisterComponents();
+        if (!isLoggedIn) {
+            addTeacherOnStartup();
+        }
+        addTeacherProfileButton();
+        displayTeacherProfile();
+    }
+
+    private void addTeacherOnStartup() {
+        int option = JOptionPane.showConfirmDialog(null,
+                "Do you want to create a new teacher account?",
+                "Create Teacher Account",
+                JOptionPane.YES_NO_OPTION);
+
+        if (option == JOptionPane.YES_OPTION) {
+            int id = 21;
+            String username = JOptionPane.showInputDialog("Enter Username:");
+            String password = JOptionPane.showInputDialog("Enter Password:");
+
+            if (username != null && password != null && !username.isEmpty() && !password.isEmpty()) {
+                ImageIcon imagePath = readImageIconFromDesktop();
+
+                userCredentials.put(username, password);
+                currentTeacher = new KSWATeacher(id, username, "Teacher", imagePath); // Erstelle einen neuen Lehrer mit Bildpfad
+                JOptionPane.showMessageDialog(null, "Teacher account created successfully!");
+            } else {
+                JOptionPane.showMessageDialog(null, "Invalid Username or Password!");
+            }
+        }
+    }
+
+    public ImageIcon readImageIconFromDesktop() {
+        JFileChooser fileChooser = new JFileChooser(System.getProperty("user.home") + "/Desktop");
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Image files", "jpg", "jpeg", "png", "gif");
+        fileChooser.setFileFilter(filter);
+
+        int returnVal = fileChooser.showOpenDialog(this);
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            return new ImageIcon(file.getAbsolutePath());
+        } else {
+            return null;
+        }
+    }
+
+    // Methode zur Anzeige des Lehrerprofils
+    private void displayTeacherProfile() {
+        if (currentTeacher != null) {
+            JFrame profileFrame = new JFrame("Teacher Profile");
+            profileFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+            JPanel profilePanel = new JPanel();
+            profilePanel.setLayout(new BoxLayout(profilePanel, BoxLayout.Y_AXIS));
+            profilePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+            JLabel nameLabel = new JLabel("Name: " + currentTeacher.getName());
+            profilePanel.add(nameLabel);
+
+            // Lehrerbild hinzufügen, falls verfügbar
+            if (currentTeacher.getImage() != null) {
+                ImageIcon teacherImage = currentTeacher.getImage();
+                JLabel imageLabel = new JLabel(teacherImage);
+                imageLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK)); // Rahmen um das Bild hinzufügen
+                profilePanel.add(imageLabel);
+            }
+
+            JLabel idLabel = new JLabel("ID: " + currentTeacher.getId());
+            profilePanel.add(idLabel);
+
+            profileFrame.add(profilePanel);
+            profileFrame.pack(); // Größe automatisch an den Inhalt anpassen
+            profileFrame.setLocationRelativeTo(null);
+            profileFrame.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(null, "No teacher logged in.");
+        }
+    }
+
+
+
+    // Methode zum Hinzufügen des Buttons zur Anzeige des Lehrerprofils
+    private void addTeacherProfileButton() {
+        JButton profileButton = createStyledButton("View Profile", Color.LIGHT_GRAY);
+        profileButton.addActionListener(e -> displayTeacherProfile());
+
+        JPanel profilePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        profilePanel.add(profileButton);
+        profilePanel.setBackground(new Color(200, 200, 200));
+        profilePanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        mainPanel.add(profilePanel, BorderLayout.NORTH);
     }
 
     private void scheduleDataUpdates() {
@@ -69,14 +163,25 @@ public class KSWAApplicationGUI extends JFrame {
         loginButton.addActionListener(e -> showLoginDialog());
         registerButton.addActionListener(e -> showRegisterDialog());
 
-        JPanel loginPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        loginPanel.add(loginButton);
-        loginPanel.add(registerButton);
-        loginPanel.setBackground(new Color(200, 200, 200));
-        loginPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        JPanel loginPanel = new JPanel();
+        loginPanel.setLayout(new BoxLayout(loginPanel, BoxLayout.Y_AXIS));
 
-        mainPanel.add(loginPanel, BorderLayout.NORTH);
+        int verticalSpacing = 10; // Ändern Sie diesen Wert je nach gewünschtem Abstand
+
+        loginPanel.add(Box.createVerticalStrut(verticalSpacing)); // Abstand oben
+
+        loginPanel.add(loginButton);
+        loginPanel.add(Box.createVerticalStrut(verticalSpacing)); // Abstand zwischen den Buttons
+        loginPanel.add(registerButton);
+
+        loginPanel.add(Box.createVerticalStrut(verticalSpacing)); // Abstand unten
+
+        loginPanel.setBackground(new Color(200, 200, 200));
+        loginPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+
+        mainPanel.add(loginPanel, BorderLayout.WEST);
     }
+
 
     private void showLoginDialog() {
         if (!isLoggedIn) {
@@ -440,14 +545,14 @@ public class KSWAApplicationGUI extends JFrame {
     }
 
 
-    public void main(String[] args) {
+    public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        SwingUtilities.invokeLater(() -> new KSWAApplicationGUI(new LoginGUI(this)));
+        SwingUtilities.invokeLater(() -> new KSWAApplicationGUI());
     }
 }
 
