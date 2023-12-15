@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.List;
 
 public class KSWAApplicationGUI extends JFrame {
+    //TODO: Register and Login should enable teacher to login
     private JTable childrenTable;
     private JTable subjectsTable;
 
