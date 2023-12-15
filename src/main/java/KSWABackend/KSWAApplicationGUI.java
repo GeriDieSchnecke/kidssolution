@@ -11,8 +11,11 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,6 +26,8 @@ import java.util.List;
 public class KSWAApplicationGUI extends JFrame {
     private JTable childrenTable;
     private JTable subjectsTable;
+
+    private JTable testsTable;
     private DefaultTableModel childrenTableModel;
     private DefaultTableModel subjectsTableModel;
     private DefaultTableModel testsTableModel;
@@ -35,6 +40,12 @@ public class KSWAApplicationGUI extends JFrame {
     private JButton logoutButton;
 
     private KSWATeacher currentTeacher;
+
+    private JTextField childrenFilterField;
+
+    private JTextField subjectsFilterField;
+
+    private JTextField testsFilterField;
 
     public KSWAApplicationGUI() {
         userCredentials = new HashMap<>();
@@ -49,7 +60,30 @@ public class KSWAApplicationGUI extends JFrame {
             addTeacherOnStartup();
         }
         addTeacherProfileButton();
-        displayTeacherProfile();
+    }
+
+    private void filterChildren() {
+        String filterText = childrenFilterField.getText().toLowerCase();
+        DefaultTableModel model = (DefaultTableModel) childrenTable.getModel();
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+        childrenTable.setRowSorter(sorter);
+        sorter.setRowFilter(RowFilter.regexFilter("(?i)" + filterText));
+    }
+
+    private void filterSubjects() {
+        String filterText = subjectsFilterField.getText().toLowerCase();
+        DefaultTableModel model = (DefaultTableModel) subjectsTable.getModel();
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+        subjectsTable.setRowSorter(sorter);
+        sorter.setRowFilter(RowFilter.regexFilter("(?i)" + filterText));
+    }
+
+    private void filterTests() {
+        String filterText = testsFilterField.getText().toLowerCase();
+        DefaultTableModel model = (DefaultTableModel) testsTable.getModel();
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+        testsTable.setRowSorter(sorter);
+        sorter.setRowFilter(RowFilter.regexFilter("(?i)" + filterText));
     }
 
     private void addTeacherOnStartup() {
@@ -95,27 +129,44 @@ public class KSWAApplicationGUI extends JFrame {
         if (currentTeacher != null) {
             JFrame profileFrame = new JFrame("Teacher Profile");
             profileFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            profileFrame.setSize(400, 400); // Setzen einer festen Größe für das Profilfenster
 
-            JPanel profilePanel = new JPanel();
-            profilePanel.setLayout(new BoxLayout(profilePanel, BoxLayout.Y_AXIS));
-            profilePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            JPanel profilePanel = new JPanel(new BorderLayout());
+            profilePanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+            profilePanel.setBackground(Color.WHITE); // Hintergrundfarbe auf Weiß setzen
 
-            JLabel nameLabel = new JLabel("Name: " + currentTeacher.getName());
-            profilePanel.add(nameLabel);
+            JLabel titleLabel = new JLabel("Teacher Profile");
+            titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
+            titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            profilePanel.add(titleLabel, BorderLayout.NORTH);
+
+            JPanel infoPanel = new JPanel(new BorderLayout());
+            infoPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
+            infoPanel.setBackground(Color.WHITE); // Hintergrundfarbe des Info-Panels auf Weiß setzen
+
+            JLabel idLabel = new JLabel("ID: " + currentTeacher.getId());
+            idLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+            idLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
+            infoPanel.add(idLabel, BorderLayout.NORTH);
 
             // Lehrerbild hinzufügen, falls verfügbar
             if (currentTeacher.getImage() != null) {
                 ImageIcon teacherImage = currentTeacher.getImage();
-                JLabel imageLabel = new JLabel(teacherImage);
-                imageLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK)); // Rahmen um das Bild hinzufügen
-                profilePanel.add(imageLabel);
+                Image scaledImage = teacherImage.getImage().getScaledInstance(180, 180, Image.SCALE_SMOOTH);
+                ImageIcon scaledTeacherImage = new ImageIcon(scaledImage);
+                JLabel imageLabel = new JLabel(scaledTeacherImage);
+                imageLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2)); // Rahmen verstärken
+                infoPanel.add(imageLabel, BorderLayout.CENTER);
             }
 
-            JLabel idLabel = new JLabel("ID: " + currentTeacher.getId());
-            profilePanel.add(idLabel);
+            JLabel nameLabel = new JLabel("Name: " + currentTeacher.getName());
+            nameLabel.setFont(new Font("Arial", Font.BOLD, 20));
+            nameLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
+            infoPanel.add(nameLabel, BorderLayout.SOUTH);
+
+            profilePanel.add(infoPanel, BorderLayout.CENTER);
 
             profileFrame.add(profilePanel);
-            profileFrame.pack(); // Größe automatisch an den Inhalt anpassen
             profileFrame.setLocationRelativeTo(null);
             profileFrame.setVisible(true);
         } else {
@@ -136,6 +187,10 @@ public class KSWAApplicationGUI extends JFrame {
         profilePanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
         mainPanel.add(profilePanel, BorderLayout.NORTH);
+
+        JPanel buttonPanel = (JPanel) ((BorderLayout) mainPanel.getLayout()).getLayoutComponent(BorderLayout.SOUTH);
+        buttonPanel.add(profileButton);
+        buttonPanel.revalidate();
     }
 
     private void scheduleDataUpdates() {
@@ -324,6 +379,75 @@ public class KSWAApplicationGUI extends JFrame {
         buttonPanel.setBackground(new Color(200, 200, 200));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
+        childrenFilterField = new JTextField();
+        childrenFilterField.setPreferredSize(new Dimension(150, 25));
+        childrenFilterField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                filterChildren();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                filterChildren();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                filterChildren();
+            }
+        });
+
+        // Filterfeld für Fächer
+        subjectsFilterField = new JTextField();
+        subjectsFilterField.setPreferredSize(new Dimension(150, 25));
+        subjectsFilterField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                filterSubjects();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                filterSubjects();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                filterSubjects();
+            }
+        });
+
+        // Filterfeld für Tests
+        testsFilterField = new JTextField();
+        testsFilterField.setPreferredSize(new Dimension(150, 25));
+        testsFilterField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                filterTests();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                filterTests();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                filterTests();
+            }
+        });
+
+        // Hinzufügen der Filterfelder zu Ihrem UI
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        filterPanel.add(new JLabel("Filter Children:"));
+        filterPanel.add(childrenFilterField);
+        filterPanel.add(new JLabel("Filter Subjects:"));
+        filterPanel.add(subjectsFilterField);
+        filterPanel.add(new JLabel("Filter Tests:"));
+        filterPanel.add(testsFilterField);
+
+        mainPanel.add(filterPanel, BorderLayout.NORTH);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         setVisible(true);
