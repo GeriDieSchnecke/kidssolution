@@ -1,11 +1,12 @@
 package KSWABackend.Model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class KSWASubject {
     private String suname;
     private double sugrade;
-    private ArrayList<KSWATest> tests;
+    private List<KSWATest> tests;
     private long id;
 
     public KSWASubject(String suname, double sugrade, ArrayList<KSWATest> tests, long id) {
@@ -34,7 +35,7 @@ public class KSWASubject {
         this.sugrade = sugrade;
     }
 
-    public ArrayList<KSWATest> getTests() {
+    public List<KSWATest> getTests() {
         return tests;
     }
 

@@ -19,8 +19,6 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.*;
 import java.util.List;
@@ -38,7 +36,7 @@ public class KSWAApplicationGUI extends JFrame {
     private JPanel mainPanel;
     private javax.swing.Timer timer;
 
-    private Map<String, String> userCredentials; // Eine temporäre Speicherung von Benutzerdaten
+    private Map<String, String> userCredentials;
     private boolean isLoggedIn;
     private JButton logoutButton;
 
@@ -56,7 +54,6 @@ public class KSWAApplicationGUI extends JFrame {
         userCredentials = new HashMap<>();
         isLoggedIn = false;
         initializeUI();
-        // Initialisierung des Timers, der alle 10 Sekunden ausgeführt wird
         scheduleDataUpdates();
         displayChildrenData();
         addShowGradesChartButton();
@@ -65,6 +62,7 @@ public class KSWAApplicationGUI extends JFrame {
             addTeacherOnStartup();
         }
         addTeacherProfileButton();
+        addChildrenProfileButton();
     }
 
     private void filterChildren() {
@@ -129,16 +127,15 @@ public class KSWAApplicationGUI extends JFrame {
         }
     }
 
-    // Methode zur Anzeige des Lehrerprofils
     private void displayTeacherProfile() {
         if (currentTeacher != null) {
             JFrame profileFrame = new JFrame("Teacher Profile");
             profileFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            profileFrame.setSize(400, 400); // Setzen einer festen Größe für das Profilfenster
+            profileFrame.setSize(400, 400);
 
             JPanel profilePanel = new JPanel(new BorderLayout());
             profilePanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-            profilePanel.setBackground(Color.WHITE); // Hintergrundfarbe auf Weiß setzen
+            profilePanel.setBackground(Color.WHITE);
 
             JLabel titleLabel = new JLabel("Teacher Profile");
             titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
@@ -147,20 +144,19 @@ public class KSWAApplicationGUI extends JFrame {
 
             JPanel infoPanel = new JPanel(new BorderLayout());
             infoPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
-            infoPanel.setBackground(Color.WHITE); // Hintergrundfarbe des Info-Panels auf Weiß setzen
+            infoPanel.setBackground(Color.WHITE);
 
             JLabel idLabel = new JLabel("ID: " + currentTeacher.getId());
             idLabel.setFont(new Font("Arial", Font.PLAIN, 18));
             idLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
             infoPanel.add(idLabel, BorderLayout.NORTH);
 
-            // Lehrerbild hinzufügen, falls verfügbar
             if (currentTeacher.getImage() != null) {
                 ImageIcon teacherImage = currentTeacher.getImage();
                 Image scaledImage = teacherImage.getImage().getScaledInstance(180, 180, Image.SCALE_SMOOTH);
                 ImageIcon scaledTeacherImage = new ImageIcon(scaledImage);
                 JLabel imageLabel = new JLabel(scaledTeacherImage);
-                imageLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2)); // Rahmen verstärken
+                imageLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
                 infoPanel.add(imageLabel, BorderLayout.CENTER);
             }
 
@@ -183,7 +179,7 @@ public class KSWAApplicationGUI extends JFrame {
         if (currentChild != null) {
             JFrame profileFrame = new JFrame("Children Profile");
             profileFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            profileFrame.setSize(400, 400);
+            profileFrame.setSize(600, 400);
 
             JPanel profilePanel = new JPanel(new BorderLayout());
             profilePanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -194,7 +190,7 @@ public class KSWAApplicationGUI extends JFrame {
             titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
             profilePanel.add(titleLabel, BorderLayout.NORTH);
 
-            JPanel infoPanel = new JPanel(new GridLayout(4, 1, 5, 5)); // 4 Zeilen für Attribute
+            JPanel infoPanel = new JPanel(new GridLayout(4, 1, 5, 5));
 
             JLabel idLabel = new JLabel("ID: " + currentChild.getId());
             idLabel.setFont(new Font("Arial", Font.PLAIN, 18));
@@ -213,6 +209,47 @@ public class KSWAApplicationGUI extends JFrame {
 
             profilePanel.add(infoPanel, BorderLayout.CENTER);
 
+            // Panel für Subjects und Tests
+            JPanel subjectsTestsPanel = new JPanel(new GridLayout(1, 2, 10, 10));
+            subjectsTestsPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+
+            // Subjects anzeigen
+            JPanel subjectsPanel = new JPanel(new BorderLayout());
+            subjectsPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
+            subjectsPanel.setBackground(Color.WHITE);
+
+            JLabel subjectsLabel = new JLabel("Subjects");
+            subjectsLabel.setFont(new Font("Arial", Font.BOLD, 20));
+            subjectsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            subjectsPanel.add(subjectsLabel, BorderLayout.NORTH);
+
+            JList<String> subjectsList = new JList<>((ListModel) currentChild.getChsubjects());
+            subjectsList.setFont(new Font("Arial", Font.PLAIN, 16));
+            JScrollPane subjectsScrollPane = new JScrollPane(subjectsList);
+            subjectsPanel.add(subjectsScrollPane, BorderLayout.CENTER);
+
+            subjectsTestsPanel.add(subjectsPanel);
+
+            // Tests anzeigen
+            JPanel testsPanel = new JPanel(new BorderLayout());
+            testsPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
+            testsPanel.setBackground(Color.WHITE);
+
+            JLabel testsLabel = new JLabel("Tests");
+            testsLabel.setFont(new Font("Arial", Font.BOLD, 20));
+            testsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            testsPanel.add(testsLabel, BorderLayout.NORTH);
+
+            List<KSWASubject> subjects = currentChild.getChsubjects();
+            JList<String> testsList = new JList<>((ListModel) subjects.get(1));
+            testsList.setFont(new Font("Arial", Font.PLAIN, 16));
+            JScrollPane testsScrollPane = new JScrollPane(testsList);
+            testsPanel.add(testsScrollPane, BorderLayout.CENTER);
+
+            subjectsTestsPanel.add(testsPanel);
+
+            profilePanel.add(subjectsTestsPanel, BorderLayout.SOUTH);
+
             profileFrame.add(profilePanel);
             profileFrame.setLocationRelativeTo(null);
             profileFrame.setVisible(true);
@@ -222,8 +259,34 @@ public class KSWAApplicationGUI extends JFrame {
     }
 
 
+    private void addChildrenProfileButton() {
+        JButton profileButton = createStyledButton("View Children's Profile", Color.LIGHT_GRAY);
+        profileButton.addActionListener(e -> displayChildrenProfile(currentChild));
+
+        profileButton.setPreferredSize(new Dimension(200, 30));
+
+        JPanel profilePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        profilePanel.add(profileButton);
+        profilePanel.setBackground(new Color(200, 200, 200));
+        profilePanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        mainPanel.add(profilePanel, BorderLayout.NORTH);
+
+        JPanel buttonPanel = (JPanel) ((BorderLayout) mainPanel.getLayout()).getLayoutComponent(BorderLayout.SOUTH);
+        buttonPanel.add(profileButton);
+        buttonPanel.revalidate();
+
+        profileButton.setEnabled(false);
+
+        childrenTable.getSelectionModel().addListSelectionListener(e -> {
+            int selectedRow = childrenTable.getSelectedRow();
+            profileButton.setEnabled(selectedRow >= 0 && selectedRow < childrenList.size());
+        });
+    }
+
+
     private void addTeacherProfileButton() {
-        JButton profileButton = createStyledButton("View Profile", Color.LIGHT_GRAY);
+        JButton profileButton = createStyledButton("View Teachers Profile", Color.LIGHT_GRAY);
         profileButton.addActionListener(e -> displayTeacherProfile());
 
         JPanel profilePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -387,7 +450,7 @@ public class KSWAApplicationGUI extends JFrame {
 
     private void initializeUI() {
         setTitle("Children Organization Kid");
-        setSize(800, 600);
+        setSize(1200, 1000);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -400,25 +463,6 @@ public class KSWAApplicationGUI extends JFrame {
 
         childrenTable = new JTable(childrenTableModel);
         subjectsTable = new JTable(subjectsTableModel);
-
-        childrenTable.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int column = childrenTable.getColumnModel().getColumnIndex("Child ID");
-                int row = childrenTable.rowAtPoint(e.getPoint());
-
-                if (column != -1 && row != -1 && childrenTable.getColumnModel().getColumn(column).getModelIndex() == column) {
-                    Object value = childrenTable.getValueAt(row, column);
-                    if (value != null && value instanceof String) {
-                        String selectedID = (String) value;
-
-                        KSWAChildren selectedChild = getChildByIDFromDataSource(selectedID);
-
-                        displayChildrenProfile(selectedChild);
-                    }
-                }
-            }
-        });
 
         JScrollPane childrenScrollPane = new JScrollPane(childrenTable);
         JScrollPane subjectsScrollPane = new JScrollPane(subjectsTable);
@@ -690,11 +734,12 @@ public class KSWAApplicationGUI extends JFrame {
         childrenTable.getSelectionModel().addListSelectionListener(e -> {
             int selectedRow = childrenTable.getSelectedRow();
             if (selectedRow >= 0 && selectedRow < childrenList.size()) {
-                KSWAChildren selectedChild = childrenList.get(selectedRow);
-                displaySubjects(selectedChild.getChsubjects());
+                currentChild = childrenList.get(selectedRow);
+                displaySubjects(currentChild.getChsubjects());
             }
         });
     }
+
 
     private void displaySubjects(List<KSWASubject> subjects) {
         subjectsTableModel.setRowCount(0);
