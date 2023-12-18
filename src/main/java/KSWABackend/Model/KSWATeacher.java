@@ -6,9 +6,8 @@ public class KSWATeacher {
     private int id;
     private String name;
     private String prename;
-    private ImageIcon image; // Verwendet ImageIcon für das Bild, Sie können hier auch andere Datentypen verwenden
+    private ImageIcon image;
 
-    // Konstruktor
     public KSWATeacher(int id, String name, String prename, ImageIcon image) {
         this.id = id;
         this.name = name;
@@ -16,7 +15,6 @@ public class KSWATeacher {
         this.image = image;
     }
 
-    // Getter und Setter für die Eigenschaften des Lehrers
     public int getId() {
         return id;
     }

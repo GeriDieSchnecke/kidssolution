@@ -346,7 +346,7 @@ public class KSWAApplicationGUI extends JFrame {
     }
 
 
-    private void showLoginDialog() {
+    public void showLoginDialog() {
         if (!isLoggedIn) {
             String username = JOptionPane.showInputDialog("Enter Username:");
             String password = JOptionPane.showInputDialog("Enter Password:");
@@ -656,7 +656,7 @@ public class KSWAApplicationGUI extends JFrame {
 
 
 
-    private void addTestsForSubject() {
+    public void addTestsForSubject() {
         if (childrenList.isEmpty()) {
             JOptionPane.showMessageDialog(null, "No children available. Please add a child first.");
             return;
@@ -722,7 +722,7 @@ public class KSWAApplicationGUI extends JFrame {
         }
     }
 
-    private void displayChildrenData() {
+    public void displayChildrenData() {
         childrenTableModel.setRowCount(0);
 
         if (childrenList != null && !childrenList.isEmpty()) {
@@ -741,7 +741,7 @@ public class KSWAApplicationGUI extends JFrame {
     }
 
 
-    private void displaySubjects(List<KSWASubject> subjects) {
+    public void displaySubjects(List<KSWASubject> subjects) {
         subjectsTableModel.setRowCount(0);
 
         if (subjects != null && !subjects.isEmpty()) {
@@ -759,7 +759,7 @@ public class KSWAApplicationGUI extends JFrame {
         });
     }
 
-    private void displayTests(List<KSWATest> tests) {
+    public void displayTests(List<KSWATest> tests) {
         testsTableModel.setRowCount(0);
 
         if (tests != null && !tests.isEmpty()) {
