@@ -64,6 +64,21 @@ public class KSWAApplicationGUI extends JFrame {
         addTeacherProfileButton();
         addChildrenProfileButton();
     }
+    public KSWAApplicationGUI(KSWATeacher teacher) {
+        this.currentTeacher = teacher;
+        userCredentials = new HashMap<>();
+        isLoggedIn = true;
+        initializeUI();
+        scheduleDataUpdates();
+        displayChildrenData();
+        addShowGradesChartButton();
+        addLoginAndRegisterComponents();
+        if (!isLoggedIn) {
+            addTeacherOnStartup();
+        }
+        addTeacherProfileButton();
+        addChildrenProfileButton();
+    }
 
     private void filterChildren() {
         String filterText = childrenFilterField.getText().toLowerCase();
@@ -321,28 +336,41 @@ public class KSWAApplicationGUI extends JFrame {
 
     private void addLoginAndRegisterComponents() {
 
-        JButton loginButton = createStyledButton("Login", Color.YELLOW);
-        JButton registerButton = createStyledButton("Register", Color.CYAN);
-        loginButton.addActionListener(e -> showLoginDialog());
-        registerButton.addActionListener(e -> showRegisterDialog());
+        if (isLoggedIn) {
+            // If logged in, create and add logout button
+            JButton logoutButton = createStyledButton("Logout", Color.RED);
+            logoutButton.addActionListener(e -> performLogout());
 
-        JPanel loginPanel = new JPanel();
-        loginPanel.setLayout(new BoxLayout(loginPanel, BoxLayout.Y_AXIS));
+            JPanel logoutPanel = new JPanel();
+            logoutPanel.setLayout(new BoxLayout(logoutPanel, BoxLayout.Y_AXIS));
+            int verticalSpacing = 10;
+            logoutPanel.add(Box.createVerticalStrut(verticalSpacing));
+            logoutPanel.add(logoutButton);
+            logoutPanel.add(Box.createVerticalStrut(verticalSpacing));
+            logoutPanel.setBackground(new Color(200, 200, 200));
+            logoutPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
-        int verticalSpacing = 10;
+            mainPanel.add(logoutPanel, BorderLayout.WEST);
+        } else {
+            // If not logged in, create and add login and register buttons
+            JButton loginButton = createStyledButton("Login", Color.YELLOW);
+            JButton registerButton = createStyledButton("Register", Color.CYAN);
+            loginButton.addActionListener(e -> showLoginDialog());
+            registerButton.addActionListener(e -> showRegisterDialog());
 
-        loginPanel.add(Box.createVerticalStrut(verticalSpacing));
+            JPanel loginPanel = new JPanel();
+            loginPanel.setLayout(new BoxLayout(loginPanel, BoxLayout.Y_AXIS));
+            int verticalSpacing = 10;
+            loginPanel.add(Box.createVerticalStrut(verticalSpacing));
+            loginPanel.add(loginButton);
+            loginPanel.add(Box.createVerticalStrut(verticalSpacing));
+            loginPanel.add(registerButton);
+            loginPanel.add(Box.createVerticalStrut(verticalSpacing));
+            loginPanel.setBackground(new Color(200, 200, 200));
+            loginPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
-        loginPanel.add(loginButton);
-        loginPanel.add(Box.createVerticalStrut(verticalSpacing));
-        loginPanel.add(registerButton);
-
-        loginPanel.add(Box.createVerticalStrut(verticalSpacing));
-
-        loginPanel.setBackground(new Color(200, 200, 200));
-        loginPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-
-        mainPanel.add(loginPanel, BorderLayout.WEST);
+            mainPanel.add(loginPanel, BorderLayout.WEST);
+        }
     }
 
 
@@ -386,20 +414,43 @@ public class KSWAApplicationGUI extends JFrame {
     }
 
     private void addLogoutButton() {
-        //TODO: Logoutbutton show in interface
         logoutButton = createStyledButton("Logout", Color.MAGENTA);
         logoutButton.setEnabled(false);
         logoutButton.addActionListener(e -> performLogout());
 
-        JPanel buttonPanel = (JPanel) ((BorderLayout) mainPanel.getLayout()).getLayoutComponent(BorderLayout.SOUTH);
-        buttonPanel.add(logoutButton);
-        buttonPanel.revalidate();
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BorderLayout());
+        buttonPanel.add(logoutButton, BorderLayout.EAST);
+
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
     }
+
 
     private void performLogout() {
         isLoggedIn = false;
         JOptionPane.showMessageDialog(null, "Logged out successfully!");
-        logoutButton.setEnabled(false);
+
+        // Schließen Sie das aktuelle LoginUI-Fenster
+        dispose();
+
+        // Starten Sie eine neue Instanz von LoginUI
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new KSWALoginUI();
+            }
+        });
+    }
+
+    private void updateUIOnLogout() {
+        // Entfernen Sie alle Komponenten aus dem Hauptpanel
+        mainPanel.removeAll();
+
+        addLoginAndRegisterComponents();
+
+        // Repaint und aktualisieren Sie das Hauptpanel, um die Änderungen anzuzeigen
+        mainPanel.revalidate();
+        mainPanel.repaint();
     }
 
     private void addShowGradesChartButton() {

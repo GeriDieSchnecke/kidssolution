@@ -15,6 +15,13 @@ public class KSWATeacher {
         this.image = image;
     }
 
+    public KSWATeacher(int id, String name) {
+        this.id = id;
+        this.name = name;
+        this.prename = prename;
+        this.image = image;
+    }
+
     public int getId() {
         return id;
     }
