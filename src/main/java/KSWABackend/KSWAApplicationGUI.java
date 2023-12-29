@@ -338,7 +338,7 @@ public class KSWAApplicationGUI extends JFrame {
 
         if (isLoggedIn) {
             // If logged in, create and add logout button
-            JButton logoutButton = createStyledButton("Logout", Color.RED);
+            JButton logoutButton = createStyledButton("Logout", Color.WHITE);
             logoutButton.addActionListener(e -> performLogout());
 
             JPanel logoutPanel = new JPanel();
@@ -353,7 +353,7 @@ public class KSWAApplicationGUI extends JFrame {
             mainPanel.add(logoutPanel, BorderLayout.WEST);
         } else {
             // If not logged in, create and add login and register buttons
-            JButton loginButton = createStyledButton("Login", Color.YELLOW);
+            JButton loginButton = createStyledButton("Login", Color.WHITE);
             JButton registerButton = createStyledButton("Register", Color.CYAN);
             loginButton.addActionListener(e -> showLoginDialog());
             registerButton.addActionListener(e -> showRegisterDialog());
@@ -414,7 +414,7 @@ public class KSWAApplicationGUI extends JFrame {
     }
 
     private void addLogoutButton() {
-        logoutButton = createStyledButton("Logout", Color.MAGENTA);
+        logoutButton = createStyledButton("Logout", Color.WHITE);
         logoutButton.setEnabled(false);
         logoutButton.addActionListener(e -> performLogout());
 
@@ -526,9 +526,9 @@ public class KSWAApplicationGUI extends JFrame {
 
         getContentPane().setBackground(new Color(240, 240, 240));
 
-        JButton addChildrenButton = createStyledButton("Add Child", Color.BLUE);
-        JButton addSubjectsButton = createStyledButton("Add Subjects", Color.GREEN);
-        JButton addTestsButton = createStyledButton("Add Tests", Color.ORANGE);
+        JButton addChildrenButton = createStyledButton("Add Child", Color.WHITE);
+        JButton addSubjectsButton = createStyledButton("Add Subjects", Color.WHITE);
+        JButton addTestsButton = createStyledButton("Add Tests", Color.WHITE);
 
         addChildrenButton.addActionListener(e -> addChildrenOnly());
         addSubjectsButton.addActionListener(e -> addSubjectsForChild());
