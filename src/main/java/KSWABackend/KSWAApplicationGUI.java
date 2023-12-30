@@ -267,7 +267,10 @@ public class KSWAApplicationGUI extends JFrame {
             subjectsLabel.setHorizontalAlignment(SwingConstants.CENTER);
             subjectsPanel.add(subjectsLabel, BorderLayout.NORTH);
 
-            JList<String> subjectsList = new JList<>((ListModel) currentChild.getChsubjects());
+            List<KSWASubject> subjects = currentChild.getChsubjects();
+            String[] subjectNames = subjects.stream().map(KSWASubject::getSuname).toArray(String[]::new);
+
+            JList<String> subjectsList = new JList<>(subjectNames);
             subjectsList.setFont(new Font("Arial", Font.PLAIN, 16));
             JScrollPane subjectsScrollPane = new JScrollPane(subjectsList);
             subjectsPanel.add(subjectsScrollPane, BorderLayout.CENTER);
@@ -284,8 +287,11 @@ public class KSWAApplicationGUI extends JFrame {
             testsLabel.setHorizontalAlignment(SwingConstants.CENTER);
             testsPanel.add(testsLabel, BorderLayout.NORTH);
 
-            List<KSWASubject> subjects = currentChild.getChsubjects();
-            JList<String> testsList = new JList<>((ListModel) subjects.get(1));
+
+            List<KSWATest> tests = subjects.isEmpty() ? new ArrayList<>() : subjects.get(0).getTests();
+            String[] testNames = tests.stream().map(KSWATest::getTename).toArray(String[]::new);
+
+            JList<String> testsList = new JList<>(testNames);
             testsList.setFont(new Font("Arial", Font.PLAIN, 16));
             JScrollPane testsScrollPane = new JScrollPane(testsList);
             testsPanel.add(testsScrollPane, BorderLayout.CENTER);
@@ -301,6 +307,8 @@ public class KSWAApplicationGUI extends JFrame {
             JOptionPane.showMessageDialog(null, "No child selected.");
         }
     }
+
+
 
 
     private void addChildrenProfileButton() {
@@ -816,7 +824,9 @@ public class KSWAApplicationGUI extends JFrame {
     }
 
     public void displayChildrenData() {
+
         childrenTableModel.setRowCount(0);
+
 
         if (childrenList != null && !childrenList.isEmpty()) {
             for (KSWAChildren child : childrenList) {
@@ -824,14 +834,26 @@ public class KSWAApplicationGUI extends JFrame {
             }
         }
 
-        childrenTable.getSelectionModel().addListSelectionListener(e -> {
-            int selectedRow = childrenTable.getSelectedRow();
-            if (selectedRow >= 0 && selectedRow < childrenList.size()) {
-                currentChild = childrenList.get(selectedRow);
-                displaySubjects(currentChild.getChsubjects());
+
+        ListSelectionModel selectionModel = childrenTable.getSelectionModel();
+
+        selectionModel.addListSelectionListener(e -> {
+
+            if (!e.getValueIsAdjusting()) {
+                int selectedRow = childrenTable.getSelectedRow();
+
+                if (selectedRow >= 0 && selectedRow < childrenList.size()) {
+
+                    currentChild = childrenList.get(selectedRow);
+
+                    displaySubjects(currentChild.getChsubjects());
+
+
+                }
             }
         });
     }
+
 
 
     public void displaySubjects(List<KSWASubject> subjects) {
