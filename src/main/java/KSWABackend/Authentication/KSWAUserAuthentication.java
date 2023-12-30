@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
+
+import KSWABackend.Licencing.Licencing;
 import KSWABackend.Model.KSWATeacher;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -56,7 +58,6 @@ public class KSWAUserAuthentication {
 
     public static KSWATeacher authenticateUser(String username, String password) throws IOException {
         createSheetIfNotExists();
-        System.out.println(" authenticateUser");
         FileInputStream file = new FileInputStream(FILE_NAME);
         XSSFWorkbook workbook = new XSSFWorkbook(file);
         XSSFSheet sheet = workbook.getSheet(SHEET_NAME);
@@ -69,7 +70,6 @@ public class KSWAUserAuthentication {
 
             if (username.equals(usernameCell) && password.equals(passwordCell)) {
                 String userId = row.getCell(0).getStringCellValue();
-                System.out.println("successful authenticated");
                 return new KSWATeacher(userId, username);
             }
         }
@@ -88,6 +88,16 @@ public class KSWAUserAuthentication {
             if (username.equals(row.getCell(1).getStringCellValue())) {
                 return false; // Username already exists
             }
+            if (licenceID.equals(row.getCell(0).getStringCellValue())) {
+                return false; // licenceID already exists
+            }
+        }
+
+        // validate licence
+        if(Licencing.validateLicence(licenceID)){
+            // pass
+        } else {
+            return false; // invalid
         }
 
         // Add new user

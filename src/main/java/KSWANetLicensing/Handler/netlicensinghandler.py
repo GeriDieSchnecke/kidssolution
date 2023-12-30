@@ -45,9 +45,9 @@ changeEntry = json_object_list[1]['property']
 #print(json.dumps(changeEntry, indent=2))
 changeEntryValid = changeEntry[0]['value']
 
-DownloadExcel = json_object_list[2]['property']
+#DownloadExcel = json_object_list[2]['property']
 #print(json.dumps(DownloadExcel, indent=2))
-DownloadExcelValid = DownloadExcel[0]['value']
+#DownloadExcelValid = DownloadExcel[0]['value']
 
-licenceString = "changeEntry@" + changeEntryValid + "@RegisterKids@" + RegisterKidsValid + "@DownloadExcel@" + DownloadExcelValid
+licenceString = "Show kids profile@" + changeEntryValid + "@Show diagram@" + RegisterKidsValid # + "@DownloadExcel@" + DownloadExcelValid
 sys.stdout.write(licenceString)

@@ -2,6 +2,7 @@ package KSWABackend;
 
 import KSWABackend.Authentication.KSWAUserAuthentication;
 import KSWABackend.Model.KSWATeacher;
+import KSWABackend.Licencing.Licencing;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,6 +13,8 @@ public class KSWALoginUI extends JFrame {
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JTextField licenceField;
+
+
 
     private KSWAApplicationGUI applicationGUI;  // Declare as a member variable
 
@@ -103,13 +106,20 @@ public class KSWALoginUI extends JFrame {
 
                 try {
                     boolean isRegistered = KSWAUserAuthentication.registerUser(username, password, licenceID);
+
+                    if (Licencing.validateLicence(licenceID)){
+                        //pass
+                    } else {
+                        JOptionPane.showMessageDialog(KSWALoginUI.this, "Licence Invalid");
+                    }
+
                     if (isRegistered) {
-                        System.out.println("before user Auth");
                         KSWATeacher authenticatedTeacher = KSWAUserAuthentication.authenticateUser(username, password);
+
                         JOptionPane.showMessageDialog(KSWALoginUI.this, "Registration successful!");
                         loginSuccess(authenticatedTeacher);  // Weiterleitung an KSWAApplicationGUI
                     } else {
-                        JOptionPane.showMessageDialog(KSWALoginUI.this, "Username already exists");
+                        JOptionPane.showMessageDialog(KSWALoginUI.this, "Username already exists or licence invalid");
                     }
                 } catch (IOException ex) {
                     ex.printStackTrace();

@@ -1,6 +1,7 @@
 package KSWABackend;
 
 import KSWABackend.Coverter.KSWAExcelConverter;
+import KSWABackend.Licencing.Licencing;
 import KSWABackend.Model.KSWAChildren;
 import KSWABackend.Model.KSWASubject;
 import KSWABackend.Model.KSWATeacher;
@@ -40,6 +41,10 @@ public class KSWAApplicationGUI extends JFrame {
     private boolean isLoggedIn;
     private JButton logoutButton;
 
+    private JButton showGradesChartButton;
+
+    private JButton profileButton;
+
     private KSWATeacher currentTeacher;
 
     private KSWAChildren currentChild;
@@ -63,6 +68,7 @@ public class KSWAApplicationGUI extends JFrame {
         }
         addTeacherProfileButton();
         addChildrenProfileButton();
+        hideUnlicencedComponents(currentTeacher);
     }
     public KSWAApplicationGUI(KSWATeacher teacher) {
         this.currentTeacher = teacher;
@@ -78,6 +84,28 @@ public class KSWAApplicationGUI extends JFrame {
         }
         addTeacherProfileButton();
         addChildrenProfileButton();
+        hideUnlicencedComponents(currentTeacher);
+    }
+
+    private void hideUnlicencedComponents(KSWATeacher teacher){
+
+        String[] licences = Licencing.getLicences(teacher.getId());
+
+        if(licences[0].equals("invalid")) {
+            showGradesChartButton.setEnabled(false);
+            profileButton.setEnabled(false);
+            return;
+        }
+
+        if(licences[1].equals("false")) {
+            //Diagramm deaktivieren durch Lizenz
+            showGradesChartButton.setVisible(false);
+        }
+
+        if(licences[3].equals("false")) {
+            //Kinderprofil deaktivieren durch Lizenz
+            profileButton.setVisible(false);
+        }
     }
 
     private void filterChildren() {
@@ -275,7 +303,7 @@ public class KSWAApplicationGUI extends JFrame {
 
 
     private void addChildrenProfileButton() {
-        JButton profileButton = createStyledButton("View Children's Profile", Color.LIGHT_GRAY);
+        profileButton = createStyledButton("View Children's Profile", Color.LIGHT_GRAY);
         profileButton.addActionListener(e -> displayChildrenProfile(currentChild));
 
         profileButton.setPreferredSize(new Dimension(200, 30));
@@ -454,9 +482,9 @@ public class KSWAApplicationGUI extends JFrame {
     }
 
     private void addShowGradesChartButton() {
-        JButton showGradesChartButton = new JButton("Show Grades Chart");
+        showGradesChartButton = new JButton("Show Grades Chart");
         showGradesChartButton.setFont(new Font("Arial", Font.BOLD, 14));
-        showGradesChartButton.setBackground(Color.RED);
+        showGradesChartButton.setBackground(Color.WHITE);
 
         showGradesChartButton.addActionListener(e -> displayGradesChart());
 
@@ -821,7 +849,7 @@ public class KSWAApplicationGUI extends JFrame {
     }
 
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
@@ -829,6 +857,6 @@ public class KSWAApplicationGUI extends JFrame {
         }
 
         SwingUtilities.invokeLater(() -> new KSWAApplicationGUI());
-    }
+    }*/
 }
 
