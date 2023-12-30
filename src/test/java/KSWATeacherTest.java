@@ -9,7 +9,7 @@ public class KSWATeacherTest {
     @Test
     public void testGettersAndSetters() {
         // Arrange
-        String teacherId = 1;
+        String teacherId = String.valueOf(1);
         String teacherName = "John";
         String teacherPrename = "Doe";
         ImageIcon teacherImage = new ImageIcon("path/to/image.jpg");
@@ -17,7 +17,7 @@ public class KSWATeacherTest {
         KSWATeacher teacher = new KSWATeacher(teacherId, teacherName, teacherPrename, teacherImage);
 
         // Act
-        teacher.setId(2);
+        teacher.setId(String.valueOf(2));
         teacher.setName("Alice");
         teacher.setPrename("Smith");
         ImageIcon newImage = new ImageIcon("path/to/newimage.jpg");

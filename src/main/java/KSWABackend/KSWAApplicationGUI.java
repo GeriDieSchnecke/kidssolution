@@ -23,6 +23,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class KSWAApplicationGUI extends JFrame {
     //TODO: Register and Login should enable teacher to login
@@ -741,16 +742,29 @@ public class KSWAApplicationGUI extends JFrame {
             return;
         }
 
-        String[] childIds = childrenList.stream().map(KSWAChildren::getId).toArray(String[]::new);
 
-        String selectedChildId = (String) JOptionPane.showInputDialog(null, "Select a Child ID:",
-                "Add Tests for Subject", JOptionPane.QUESTION_MESSAGE, null, childIds, childIds[0]);
+
+        List<Long> childIds = childrenList.stream()
+                .map(KSWAChildren::getId)
+                .collect(Collectors.toList());
+
+
+        // Übergebe die Liste an das JOptionPane
+        Long selectedChildId = (Long) JOptionPane.showInputDialog(
+                null,
+                "Select a Child ID:",
+                "Add Tests for Subject",
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                childIds.toArray(new Long[0]), // Konvertiere die Liste wieder in ein Long-Array
+                childIds.get(0) // Standardwert (falls die Liste leer ist)
+        );
 
         KSWAChildren selectedChild = null;
         for (KSWAChildren child : childrenList) {
             if (child.getId().equals(selectedChildId)) {
                 selectedChild = child;
-                break;
+
             }
         }
 

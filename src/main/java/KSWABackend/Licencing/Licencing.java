@@ -11,6 +11,7 @@ public class Licencing {
     // I7G6NPH6C    Show diagram & Kid profile
 
 
+
     public static void runGetLicences(){
     String[] CustomerLicences = getLicences("I7KI9KY9S");
         assert CustomerLicences != null;
@@ -42,7 +43,7 @@ public class Licencing {
             // Set path to python.exe in environment where json and pycurl is installed
 
             String absPathWorkingdir = System.getProperty("user.dir");
-            String pythonCommand = "E:/Envs/envs/rest/python.exe " + absPathWorkingdir + "/src/main/java/KSWANetLicensing/Handler/netlicensinghandler.py " + licenceID;
+            String pythonCommand = "C:/python/python.exe " + absPathWorkingdir + "/src/main/java/KSWANetLicensing/Handler/netlicensinghandler.py " + licenceID;
             Process p = Runtime.getRuntime().exec(pythonCommand);
 
             BufferedReader stdInput = new BufferedReader(new
