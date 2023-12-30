@@ -111,7 +111,7 @@ public class KSWAApplicationGUI extends JFrame {
                 JOptionPane.YES_NO_OPTION);
 
         if (option == JOptionPane.YES_OPTION) {
-            int id = 21;
+            String id = "21";
             String username = JOptionPane.showInputDialog("Enter Username:");
             String password = JOptionPane.showInputDialog("Enter Password:");
 

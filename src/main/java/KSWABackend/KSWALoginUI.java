@@ -11,13 +11,14 @@ public class KSWALoginUI extends JFrame {
 
     private JTextField usernameField;
     private JPasswordField passwordField;
+    private JTextField licenceField;
 
     private KSWAApplicationGUI applicationGUI;  // Declare as a member variable
 
     public KSWALoginUI() {
         setTitle("Login");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(300, 150);
+        setSize(360, 220);
         setLocationRelativeTo(null);
 
 
@@ -51,8 +52,20 @@ public class KSWALoginUI extends JFrame {
         loginButton.setBounds(10, 80, 80, 25);
         panel.add(loginButton);
 
+        JLabel licenceLabel = new JLabel("Licence:");
+        licenceLabel.setBounds(10, 110, 80, 25);
+        panel.add(licenceLabel);
+
+        licenceField = new JTextField(20);
+        licenceField.setBounds(100, 110, 165, 25);
+        panel.add(licenceField);
+
+        JLabel licenceNumberLabel = new JLabel("For registration enter licence number");
+        licenceNumberLabel.setBounds(100, 140, 240, 25);
+        panel.add(licenceNumberLabel);
+
         JButton registerButton = new JButton("Register");
-        registerButton.setBounds(180, 80, 80, 25);
+        registerButton.setBounds(10, 140, 80, 25);
         panel.add(registerButton);
 
         // Add action listeners
@@ -81,15 +94,17 @@ public class KSWALoginUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String username = usernameField.getText();
                 String password = new String(passwordField.getPassword());
+                String licenceID = licenceField.getText();
 
-                if (username.isEmpty() || password.isEmpty()) {
-                    JOptionPane.showMessageDialog(KSWALoginUI.this, "Please enter both username and password");
+                if (username.isEmpty() || password.isEmpty() || licenceID.isEmpty()) {
+                    JOptionPane.showMessageDialog(KSWALoginUI.this, "Please enter username, password and licencenumber");
                     return; // Methode beenden, falls Eingaben fehlen
                 }
 
                 try {
-                    boolean isRegistered = KSWAUserAuthentication.registerUser(username, password);
+                    boolean isRegistered = KSWAUserAuthentication.registerUser(username, password, licenceID);
                     if (isRegistered) {
+                        System.out.println("before user Auth");
                         KSWATeacher authenticatedTeacher = KSWAUserAuthentication.authenticateUser(username, password);
                         JOptionPane.showMessageDialog(KSWALoginUI.this, "Registration successful!");
                         loginSuccess(authenticatedTeacher);  // Weiterleitung an KSWAApplicationGUI
@@ -102,6 +117,7 @@ public class KSWALoginUI extends JFrame {
             }
         });
     }
+    // Main Start
     private void loginSuccess(KSWATeacher authenticatedTeacher) {
         // Login-UI ausblenden
         this.setVisible(false);
@@ -110,7 +126,7 @@ public class KSWALoginUI extends JFrame {
         applicationGUI = new KSWAApplicationGUI(authenticatedTeacher);
         applicationGUI.setVisible(true);
     }
-
+// Main Start
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override

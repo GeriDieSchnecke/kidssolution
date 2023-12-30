@@ -3,30 +3,30 @@ package KSWABackend.Model;
 import javax.swing.*;
 
 public class KSWATeacher {
-    private int id;
+    private String id;
     private String name;
     private String prename;
     private ImageIcon image;
 
-    public KSWATeacher(int id, String name, String prename, ImageIcon image) {
+    public KSWATeacher(String id, String name, String prename, ImageIcon image) {
         this.id = id;
         this.name = name;
         this.prename = prename;
         this.image = image;
     }
 
-    public KSWATeacher(int id, String name) {
+    public KSWATeacher(String id, String name) {
         this.id = id;
         this.name = name;
         this.prename = prename;
         this.image = image;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

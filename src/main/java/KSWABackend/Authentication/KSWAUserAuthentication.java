@@ -30,7 +30,8 @@ public class KSWAUserAuthentication {
             // Register logic
             String newUsername = "new_test";
             String newPassword = "new_password";
-            boolean isUserRegistered = registerUser(newUsername, newPassword);
+            String newLicence = "I7KI9KY9S";
+            boolean isUserRegistered = registerUser(newUsername, newPassword, newLicence);
             System.out.println("Is User Registered: " + isUserRegistered);
 
         } catch (IOException e) {
@@ -55,7 +56,7 @@ public class KSWAUserAuthentication {
 
     public static KSWATeacher authenticateUser(String username, String password) throws IOException {
         createSheetIfNotExists();
-
+        System.out.println(" authenticateUser");
         FileInputStream file = new FileInputStream(FILE_NAME);
         XSSFWorkbook workbook = new XSSFWorkbook(file);
         XSSFSheet sheet = workbook.getSheet(SHEET_NAME);
@@ -63,15 +64,19 @@ public class KSWAUserAuthentication {
         rowIterator.next(); // Skip header row
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
-            if (username.equals(row.getCell(1).getStringCellValue()) && password.equals(row.getCell(2).getStringCellValue())) {
-                int userId = (int) row.getCell(0).getNumericCellValue();
+            String usernameCell = row.getCell(1).getStringCellValue();
+            String passwordCell = row.getCell(2).getStringCellValue();
+
+            if (username.equals(usernameCell) && password.equals(passwordCell)) {
+                String userId = row.getCell(0).getStringCellValue();
+                System.out.println("successful authenticated");
                 return new KSWATeacher(userId, username);
             }
         }
         return null;
     }
 
-    public static boolean registerUser(String username, String password) throws IOException {
+    public static boolean registerUser(String username, String password, String licenceID) throws IOException {
         createSheetIfNotExists();
         FileInputStream file = new FileInputStream(FILE_NAME);
         XSSFWorkbook workbook = new XSSFWorkbook(file);
@@ -87,7 +92,7 @@ public class KSWAUserAuthentication {
 
         // Add new user
         Row newRow = sheet.createRow(sheet.getLastRowNum() + 1);
-        newRow.createCell(0).setCellValue(generateRandomId()); // Set a new unique row ID
+        newRow.createCell(0).setCellValue(licenceID); // Set a new unique row ID with licence number
         newRow.createCell(1).setCellValue(username);
         newRow.createCell(2).setCellValue(password);
 

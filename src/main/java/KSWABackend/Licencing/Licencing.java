@@ -12,7 +12,7 @@ public class Licencing {
             System.out.println(a);
     }
 
-    public static String[] getLicences(String licenceID){
+    public String[] getLicences(String licenceID){
         String s = null;
         String[] CustomerLicences;
 
@@ -21,7 +21,7 @@ public class Licencing {
             // pip install pycurl
             // Set path to python.exe in environment where json and pycurl is installed
 
-            String pythonCommand = "E:/Envs/envs/rest/python.exe app.py " + licenceID;
+            String pythonCommand = "E:/Envs/envs/rest/python.exe ../../KSQANetLicensing/Handler/netlicensinghandler.py" + licenceID;
             Process p = Runtime.getRuntime().exec(pythonCommand);
 
             BufferedReader stdInput = new BufferedReader(new
@@ -48,9 +48,11 @@ public class Licencing {
             return CustomerLicences;
 
         } catch (Exception exception){
-            exception.printStackTrace();
+            //exception.printStackTrace();
+            String[] invalid = new String[1];
+            invalid[0] = "invalid";
+            return invalid;
         }
-        return null;
     }
 
 }

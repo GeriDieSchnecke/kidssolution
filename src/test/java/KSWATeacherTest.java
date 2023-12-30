@@ -9,7 +9,7 @@ public class KSWATeacherTest {
     @Test
     public void testGettersAndSetters() {
         // Arrange
-        int teacherId = 1;
+        String teacherId = 1;
         String teacherName = "John";
         String teacherPrename = "Doe";
         ImageIcon teacherImage = new ImageIcon("path/to/image.jpg");

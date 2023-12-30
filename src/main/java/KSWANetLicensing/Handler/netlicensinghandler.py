@@ -1,26 +1,53 @@
-import requests
+from io import BytesIO
+import pycurl
+import sys
 import json
 
-# Beispiel-URL zur NetLicensing-API
-api_url = "https://www.netlicensing.io/core/v2/rest/"
+# pip install json
+# pip install pycurl
 
-# Hier fügst du deinen eigenen Zugriffsschlüssel (API-Schlüssel) ein
-api_key = "DEIN_API_SCHLUESSEL"
+# Programmstart: python app.py Lizenznummer
+# I7KI9KY9S Lizenznummer
 
-# Beispiel-Endpunkt, um Lizenzinformationen abzurufen
-endpoint = "license"
+api_url = "https://go.netlicensing.io/core/v2/rest/licensee/" + \
+    sys.argv[1] + "/validate" # api url mit Lizenznummer die als Argument beim Programmstart übergeben wurde
 
-headers = {
-    "Accept": "application/json",
-    "Authorization": f"Basic {api_key}"
-}
+# imports here
+headers = ["Authorization: Basic ZGVtbzpkZW1v", "Accept: application/json"]
+buffer = BytesIO()
+c = pycurl.Curl()
+c.setopt(c.URL, api_url)
+c.setopt(c.HTTPHEADER, headers)
+c.setopt(c.WRITEDATA, buffer)
+c.perform()
+c.close()
+response = buffer.getvalue()
+# json_string = response.decode("utf-8")
+json_object = json.loads(response)
 
-# Anfrage an die NetLicensing-API senden
-response = requests.get(f"{api_url}/{endpoint}", headers=headers)
+json_object_info = json_object['infos']['info']
+json_object_info = json_object_info[0]['id']
+if(json_object_info == 'NotFoundException'):
+    sys.stdout.write("invalid")
+    exit(1)
 
-if response.status_code == 200:
-    license_info = response.json()
-    # Hier kannst du die Lizenzinformationen weiterverarbeiten
-    print(json.dumps(license_info, indent=2))
-else:
-    print(f"Fehler beim Abrufen der Lizenzinformationen. Statuscode: {response.status_code}")
+#print(json.dumps(json_object, indent=2))
+
+### Licencing
+json_object_item = json_object['items']['item']
+json_object_list = json_object_item[0]['list']
+
+RegisterKids = json_object_list[0]['property']
+#print(json.dumps(RegisterKids, indent=2))
+RegisterKidsValid = RegisterKids[0]['value']
+
+changeEntry = json_object_list[1]['property']
+#print(json.dumps(changeEntry, indent=2))
+changeEntryValid = changeEntry[0]['value']
+
+DownloadExcel = json_object_list[2]['property']
+#print(json.dumps(DownloadExcel, indent=2))
+DownloadExcelValid = DownloadExcel[0]['value']
+
+licenceString = "changeEntry@" + changeEntryValid + "@RegisterKids@" + RegisterKidsValid + "@DownloadExcel@" + DownloadExcelValid
+sys.stdout.write(licenceString)
