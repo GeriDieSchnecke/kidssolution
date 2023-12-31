@@ -1,148 +1,125 @@
 package KSWABackend;
 
-import KSWABackend.Authentication.KSWAUserAuthentication;
+import KSWABackend.KSWAApplicationGUI;
 import KSWABackend.Model.KSWATeacher;
-import KSWABackend.Licencing.Licencing;
+
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.IOException;
+import java.awt.*;
 
 public class KSWALoginUI extends JFrame {
 
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JTextField licenceField;
+    private KSWAApplicationGUI applicationGUI;
 
-
-
-    private KSWAApplicationGUI applicationGUI;  // Declare as a member variable
+    private static final int FRAME_WIDTH = 500;
+    private static final int FRAME_HEIGHT = 400;
 
     public KSWALoginUI() {
-        setTitle("Login");
+        initializeUI();
+    }
+
+    private void initializeUI() {
+        setTitle("Children Organization Kid");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(360, 220);
+        setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setLocationRelativeTo(null);
+        setResizable(false);
 
-
-        JPanel panel = new JPanel();
+        JPanel panel = new JPanel(new GridBagLayout());
         add(panel);
-        placeComponents(panel);
+        setupComponents(panel);
 
         setVisible(true);
     }
 
-    private void placeComponents(JPanel panel) {
-        panel.setLayout(null);
+    private void setupComponents(JPanel panel) {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(10, 10, 10, 10);
 
-        JLabel userLabel = new JLabel("Username:");
-        userLabel.setBounds(10, 20, 80, 25);
-        panel.add(userLabel);
+        JLabel titleLabel = new JLabel("KSWA Login");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        panel.add(titleLabel, gbc);
 
-        usernameField = new JTextField(20);
-        usernameField.setBounds(100, 20, 165, 25);
-        panel.add(usernameField);
+        gbc.gridy++;
+        addLabelAndTextField(panel, "Username:", usernameField = new JTextField(25), gbc); // Vergrößertes Textfeld
 
-        JLabel passwordLabel = new JLabel("Password:");
-        passwordLabel.setBounds(10, 50, 80, 25);
-        panel.add(passwordLabel);
+        gbc.gridy++;
+        addLabelAndTextField(panel, "Password:", passwordField = new JPasswordField(25), gbc); // Vergrößertes Textfeld
 
-        passwordField = new JPasswordField(20);
-        passwordField.setBounds(100, 50, 165, 25);
-        panel.add(passwordField);
-
+        gbc.gridy++;
         JButton loginButton = new JButton("Login");
-        loginButton.setBounds(10, 80, 80, 25);
-        panel.add(loginButton);
+        loginButton.setPreferredSize(new Dimension(120, 30));
+        panel.add(loginButton, gbc);
 
-        JLabel licenceLabel = new JLabel("Licence:");
-        licenceLabel.setBounds(10, 110, 80, 25);
-        panel.add(licenceLabel);
+        gbc.gridy++;
+        addLabelAndTextField(panel, "Licence:", licenceField = new JTextField(25), gbc); // Vergrößertes Textfeld
 
-        licenceField = new JTextField(20);
-        licenceField.setBounds(100, 110, 165, 25);
-        panel.add(licenceField);
+        gbc.gridy++;
+        JLabel infoLabel = new JLabel("For registration, enter licence number");
+        panel.add(infoLabel, gbc);
 
-        JLabel licenceNumberLabel = new JLabel("For registration enter licence number");
-        licenceNumberLabel.setBounds(100, 140, 240, 25);
-        panel.add(licenceNumberLabel);
-
+        gbc.gridy++;
         JButton registerButton = new JButton("Register");
-        registerButton.setBounds(10, 140, 80, 25);
-        panel.add(registerButton);
+        registerButton.setPreferredSize(new Dimension(120, 30));
+        panel.add(registerButton, gbc);
 
-        // Add action listeners
-        loginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    String username = usernameField.getText();
-                    String password = new String(passwordField.getPassword());
-                    KSWATeacher authenticatedTeacher = KSWAUserAuthentication.authenticateUser(username, password);
-
-                    if (authenticatedTeacher != null) {
-                        JOptionPane.showMessageDialog(KSWALoginUI.this, "Login successful!");
-                        loginSuccess(authenticatedTeacher);  // Weiterleitung an KSWAApplicationGUI
-                    } else {
-                        JOptionPane.showMessageDialog(KSWALoginUI.this, "Invalid username or password");
-                    }
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        });
-
-        registerButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String username = usernameField.getText();
-                String password = new String(passwordField.getPassword());
-                String licenceID = licenceField.getText();
-
-                if (username.isEmpty() || password.isEmpty() || licenceID.isEmpty()) {
-                    JOptionPane.showMessageDialog(KSWALoginUI.this, "Please enter username, password and licencenumber");
-                    return; // Methode beenden, falls Eingaben fehlen
-                }
-
-                try {
-                    boolean isRegistered = KSWAUserAuthentication.registerUser(username, password, licenceID);
-
-                    if (Licencing.validateLicence(licenceID)){
-                        //pass
-                    } else {
-                        JOptionPane.showMessageDialog(KSWALoginUI.this, "Licence Invalid");
-                    }
-
-                    if (isRegistered) {
-                        KSWATeacher authenticatedTeacher = KSWAUserAuthentication.authenticateUser(username, password);
-
-                        JOptionPane.showMessageDialog(KSWALoginUI.this, "Registration successful!");
-                        loginSuccess(authenticatedTeacher);  // Weiterleitung an KSWAApplicationGUI
-                    } else {
-                        JOptionPane.showMessageDialog(KSWALoginUI.this, "Username already exists or licence invalid");
-                    }
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        });
+        loginButton.addActionListener(e -> onLoginButtonClick());
+        registerButton.addActionListener(e -> onRegisterButtonClick());
     }
-    // Main Start
-    private void loginSuccess(KSWATeacher authenticatedTeacher) {
-        // Login-UI ausblenden
-        this.setVisible(false);
 
-        // Anwendungsgui initialisieren und anzeigen
+    private void addLabelAndTextField(JPanel panel, String labelText, JTextField textField, GridBagConstraints gbc) {
+        gbc.gridx = 0;
+        JLabel label = new JLabel(labelText);
+        label.setFont(new Font("Arial", Font.PLAIN, 16));
+        panel.add(label, gbc);
+
+        gbc.gridx++;
+        panel.add(textField, gbc);
+    }
+
+    private void onLoginButtonClick() {
+        String username = usernameField.getText();
+        String password = new String(passwordField.getPassword());
+
+        if ("username".equals(username) && "password".equals(password)) {
+            JOptionPane.showMessageDialog(this, "Login successful!");
+            KSWATeacher authenticatedTeacher = new KSWATeacher(username, "Teacher Name");
+            loginSuccess(authenticatedTeacher);
+        } else {
+            JOptionPane.showMessageDialog(this, "Invalid username or password");
+        }
+    }
+
+    private void onRegisterButtonClick() {
+        String username = usernameField.getText();
+        String password = new String(passwordField.getPassword());
+        String licenceID = licenceField.getText();
+
+        if (username.isEmpty() || password.isEmpty() || licenceID.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter username, password, and licence number");
+            return;
+        }
+
+        if ("uniqueID".equals(licenceID)) {
+            KSWATeacher registeredTeacher = new KSWATeacher(username, "Teacher Name");
+            JOptionPane.showMessageDialog(this, "Registration successful!");
+            loginSuccess(registeredTeacher);
+        } else {
+            JOptionPane.showMessageDialog(this, "Invalid licence");
+        }
+    }
+
+    private void loginSuccess(KSWATeacher authenticatedTeacher) {
+        this.setVisible(false);
         applicationGUI = new KSWAApplicationGUI(authenticatedTeacher);
         applicationGUI.setVisible(true);
     }
-// Main Start
+
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new KSWALoginUI();
-            }
-        });
+        SwingUtilities.invokeLater(KSWALoginUI::new);
     }
 }

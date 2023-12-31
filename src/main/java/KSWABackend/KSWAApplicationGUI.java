@@ -287,7 +287,6 @@ public class KSWAApplicationGUI extends JFrame {
             testsLabel.setHorizontalAlignment(SwingConstants.CENTER);
             testsPanel.add(testsLabel, BorderLayout.NORTH);
 
-
             List<KSWATest> tests = subjects.isEmpty() ? new ArrayList<>() : subjects.get(0).getTests();
             String[] testNames = tests.stream().map(KSWATest::getTename).toArray(String[]::new);
 
@@ -297,6 +296,22 @@ public class KSWAApplicationGUI extends JFrame {
             testsPanel.add(testsScrollPane, BorderLayout.CENTER);
 
             subjectsTestsPanel.add(testsPanel);
+
+            JButton showTestsButton = new JButton("Show Tests");
+            showTestsButton.setFont(new Font("Arial", Font.PLAIN, 16));
+            Dimension buttonSize = new Dimension(150, 30);
+            showTestsButton.setPreferredSize(buttonSize);
+            showTestsButton.addActionListener(e -> {
+                int selectedIndex = subjectsList.getSelectedIndex();
+                if (selectedIndex != -1) {
+                    List<KSWATest> selectedTests = subjects.get(selectedIndex).getTests();
+                    String[] selectedTestNames = selectedTests.stream().map(KSWATest::getTename).toArray(String[]::new);
+                    testsList.setListData(selectedTestNames);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Please select a subject first.");
+                }
+            });
+            subjectsTestsPanel.add(showTestsButton);
 
             profilePanel.add(subjectsTestsPanel, BorderLayout.SOUTH);
 
@@ -546,7 +561,7 @@ public class KSWAApplicationGUI extends JFrame {
         getContentPane().add(mainPanel);
 
         childrenTableModel = new DefaultTableModel(new String[]{"Child ID", "Child Name", "Birthday"}, 0);
-        subjectsTableModel = new DefaultTableModel(new String[]{"Subject Name", "Grade"}, 0);
+        subjectsTableModel = new DefaultTableModel(new String[]{"Subject Name", "Grade", "Tests"}, 0);
         testsTableModel = new DefaultTableModel(new String[]{"Test Name", "Grade", "Factor", "Date"}, 0);
 
         childrenTable = new JTable(childrenTableModel);
@@ -646,6 +661,16 @@ public class KSWAApplicationGUI extends JFrame {
         mainPanel.add(filterPanel, BorderLayout.BEFORE_FIRST_LINE);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
+        JButton exportExcelButton = new JButton("Export to Excel");
+        exportExcelButton.setFont(new Font("Arial", Font.PLAIN, 16));
+        exportExcelButton.addActionListener(e -> {
+            String absPathWorkingdir = System.getProperty("user.dir");
+            String filePath = absPathWorkingdir + "/src/main/export_excel.xlsx";
+            KSWAExcelConverter.exportExcel(childrenList, filePath);
+            JOptionPane.showMessageDialog(null, "Excel file has been created successfully!");
+        });
+        buttonPanel.add(exportExcelButton);
+
         setVisible(true);
     }
 
@@ -656,48 +681,6 @@ public class KSWAApplicationGUI extends JFrame {
         return button;
     }
 
-    private void addData() {
-        int selectedRow = childrenTable.getSelectedRow();
-
-        if (selectedRow >= 0 && selectedRow < childrenList.size()) {
-            KSWAChildren existingChild = childrenList.get(selectedRow);
-
-            boolean addMoreSubjects = true;
-
-            while (addMoreSubjects) {
-                String subjectName = JOptionPane.showInputDialog("Enter Subject Name for the Child:");
-                double subjectGrade = Double.parseDouble(JOptionPane.showInputDialog("Enter Grade for the Subject:"));
-
-                KSWASubject newSubject = new KSWASubject(subjectName, subjectGrade, new ArrayList<>(), 0);
-
-                boolean addMoreTests = true;
-
-                while (addMoreTests) {
-                    String testName = JOptionPane.showInputDialog("Enter Test Name for the Subject:");
-                    double testGrade = Double.parseDouble(JOptionPane.showInputDialog("Enter Grade for the Test:"));
-                    double testFactor = Double.parseDouble(JOptionPane.showInputDialog("Enter Factor for the Test:"));
-                    // Assuming date input as string for simplicity
-                    String testDate = JOptionPane.showInputDialog("Enter Date for the Test (YYYY-MM-DD):");
-
-                    KSWATest newTest = new KSWATest(testGrade, testName, testFactor, null, 0);
-
-                    newSubject.getTests().add(newTest);
-
-                    int option = JOptionPane.showConfirmDialog(null, "Add another Test?", "Add Test", JOptionPane.YES_NO_OPTION);
-                    addMoreTests = option == JOptionPane.YES_OPTION;
-                }
-
-                existingChild.getChsubjects().add(newSubject);
-
-                int option = JOptionPane.showConfirmDialog(null, "Add another Subject?", "Add Subject", JOptionPane.YES_NO_OPTION);
-                addMoreSubjects = option == JOptionPane.YES_OPTION;
-            }
-
-            displayChildrenData();
-        } else {
-            JOptionPane.showMessageDialog(null, "Please select a child from the table first.");
-        }
-    }
 
     private void addChildrenOnly() {
         String id = JOptionPane.showInputDialog("Enter Child ID:");
@@ -750,29 +733,25 @@ public class KSWAApplicationGUI extends JFrame {
             return;
         }
 
-
-
         List<Long> childIds = childrenList.stream()
                 .map(KSWAChildren::getId)
                 .collect(Collectors.toList());
 
 
-        // Übergebe die Liste an das JOptionPane
         Long selectedChildId = (Long) JOptionPane.showInputDialog(
                 null,
                 "Select a Child ID:",
                 "Add Tests for Subject",
                 JOptionPane.QUESTION_MESSAGE,
                 null,
-                childIds.toArray(new Long[0]), // Konvertiere die Liste wieder in ein Long-Array
-                childIds.get(0) // Standardwert (falls die Liste leer ist)
+                childIds.toArray(new Long[0]),
+                childIds.get(0)
         );
 
         KSWAChildren selectedChild = null;
         for (KSWAChildren child : childrenList) {
             if (child.getId().equals(selectedChildId)) {
                 selectedChild = child;
-
             }
         }
 
@@ -814,7 +793,10 @@ public class KSWAApplicationGUI extends JFrame {
 
             KSWATest newTest = new KSWATest(testGrade, testName, testFactor, new Date(testDate), 0);
 
-            selectedSubject.getTests().add(newTest);
+            ArrayList<KSWATest> tests = null;
+            tests.add(newTest);
+
+            selectedSubject.setTests(tests);
 
             int option = JOptionPane.showConfirmDialog(null, "Add another Test?", "Add Test", JOptionPane.YES_NO_OPTION);
             addMoreTests = option == JOptionPane.YES_OPTION;
@@ -854,14 +836,13 @@ public class KSWAApplicationGUI extends JFrame {
         });
     }
 
-
-
     public void displaySubjects(List<KSWASubject> subjects) {
         subjectsTableModel.setRowCount(0);
 
         if (subjects != null && !subjects.isEmpty()) {
             for (KSWASubject subject : subjects) {
-                subjectsTableModel.addRow(new Object[]{subject.getSuname(), subject.getSugrade()});
+                String testsInfo = getTestsInfo(subject.getTests());
+                subjectsTableModel.addRow(new Object[]{subject.getSuname(), subject.getSugrade(), testsInfo});
             }
         }
 
@@ -872,6 +853,17 @@ public class KSWAApplicationGUI extends JFrame {
                 displayTests(selectedSubject.getTests());
             }
         });
+    }
+
+    private String getTestsInfo(List<KSWATest> tests) {
+        StringBuilder testsInfo = new StringBuilder();
+        if (tests != null && !tests.isEmpty()) {
+            for (KSWATest test : tests) {
+                testsInfo.append(test.getTename()).append(": ").append(test.getTegrade()).append(", ");
+            }
+            testsInfo.delete(testsInfo.length() - 2, testsInfo.length());
+        }
+        return testsInfo.toString();
     }
 
     public void displayTests(List<KSWATest> tests) {
@@ -885,7 +877,7 @@ public class KSWAApplicationGUI extends JFrame {
     }
 
 
-    /*public static void main(String[] args) {
+    public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
@@ -893,6 +885,5 @@ public class KSWAApplicationGUI extends JFrame {
         }
 
         SwingUtilities.invokeLater(() -> new KSWAApplicationGUI());
-    }*/
+    }
 }
-
