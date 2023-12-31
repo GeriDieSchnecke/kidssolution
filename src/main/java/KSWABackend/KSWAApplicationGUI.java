@@ -803,6 +803,7 @@ public class KSWAApplicationGUI extends JFrame {
 
             displayTests(selectedSubject.getTests());
         }
+        displayTests(selectedSubject.getTests());
     }
 
     public void displayChildrenData() {

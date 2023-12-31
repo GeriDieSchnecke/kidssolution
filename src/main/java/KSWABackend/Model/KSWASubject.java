@@ -9,6 +9,8 @@ public class KSWASubject {
     private List<KSWATest> tests;
     private long id;
 
+    private KSWAChildren children;
+
     public KSWASubject(String suname, double sugrade, ArrayList<KSWATest> tests, long id) {
         this.suname = suname;
         this.sugrade = sugrade;
@@ -39,9 +41,6 @@ public class KSWASubject {
         return tests;
     }
 
-    public void setTests(ArrayList<KSWATest> tests) {
-        this.tests = tests;
-    }
 
     public long getId() {
         return id;
@@ -49,6 +48,18 @@ public class KSWASubject {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public void setTests(List<KSWATest> tests) {
+        this.tests = tests;
+    }
+
+    public KSWAChildren getChildren() {
+        return children;
+    }
+
+    public void setChildren(KSWAChildren children) {
+        this.children = children;
     }
 }
 
