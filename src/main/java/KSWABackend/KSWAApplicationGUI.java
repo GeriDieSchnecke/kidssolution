@@ -662,7 +662,7 @@ public class KSWAApplicationGUI extends JFrame {
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         JButton exportExcelButton = new JButton("Export to Excel");
-        exportExcelButton.setFont(new Font("Arial", Font.PLAIN, 16));
+        exportExcelButton.setFont(new Font("Arial", Font.BOLD, 16));
         exportExcelButton.addActionListener(e -> {
             String absPathWorkingdir = System.getProperty("user.dir");
             String filePath = absPathWorkingdir + "/src/main/export_excel.xlsx";
