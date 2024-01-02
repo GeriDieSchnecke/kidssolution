@@ -23,13 +23,11 @@ public class KSWAUserAuthentication {
         try {
             createSheetIfNotExists();
 
-            // Login logic
             String username = "new_test";
             String password = "new_password";
             KSWATeacher isUserAuthenticated = authenticateUser(username, password);
             System.out.println("Is User Authenticated: " + isUserAuthenticated);
 
-            // Register logic
             String newUsername = "new_test";
             String newPassword = "new_password";
             String newLicence = "I7KI9KY9S";
@@ -41,7 +39,7 @@ public class KSWAUserAuthentication {
         }
     }
 
-    private static void createSheetIfNotExists() throws IOException {
+    public static void createSheetIfNotExists() throws IOException {
         File file = new File(FILE_NAME);
         if (!file.exists()) {
             XSSFWorkbook workbook = new XSSFWorkbook();
@@ -62,7 +60,7 @@ public class KSWAUserAuthentication {
         XSSFWorkbook workbook = new XSSFWorkbook(file);
         XSSFSheet sheet = workbook.getSheet(SHEET_NAME);
         Iterator<Row> rowIterator = sheet.iterator();
-        rowIterator.next(); // Skip header row
+        rowIterator.next();
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
             String usernameCell = row.getCell(1).getStringCellValue();
@@ -82,31 +80,28 @@ public class KSWAUserAuthentication {
         XSSFWorkbook workbook = new XSSFWorkbook(file);
         XSSFSheet sheet = workbook.getSheet(SHEET_NAME);
         Iterator<Row> rowIterator = sheet.iterator();
-        rowIterator.next(); // Skip header row
+        rowIterator.next();
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
             if (username.equals(row.getCell(1).getStringCellValue())) {
-                return false; // Username already exists
+                return false;
             }
             if (licenceID.equals(row.getCell(0).getStringCellValue())) {
-                return false; // licenceID already exists
+                return false;
             }
         }
 
-        // validate licence
         if(Licencing.validateLicence(licenceID)){
             // pass
         } else {
-            return false; // invalid
+            return false;
         }
 
-        // Add new user
         Row newRow = sheet.createRow(sheet.getLastRowNum() + 1);
-        newRow.createCell(0).setCellValue(licenceID); // Set a new unique row ID with licence number
+        newRow.createCell(0).setCellValue(licenceID);
         newRow.createCell(1).setCellValue(username);
         newRow.createCell(2).setCellValue(password);
 
-        // Write to file
         FileOutputStream fileOut = new FileOutputStream(FILE_NAME);
         workbook.write(fileOut);
         fileOut.close();
@@ -114,8 +109,7 @@ public class KSWAUserAuthentication {
         return true;
     }
     private static int generateRandomId() {
-        // Generiere eine Zufallszahl mit maximal 4 Stellen
         Random random = new Random();
-        return random.nextInt(10000);  // 10000 ist die Obergrenze (exklusiv)
+        return random.nextInt(10000);
     }
 }

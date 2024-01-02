@@ -40,7 +40,7 @@ public class KSWALoginUI extends JFrame {
         gbc.gridy = 0;
         gbc.insets = new Insets(10, 10, 10, 10);
 
-        JLabel titleLabel = new JLabel("KSWA Login");
+        JLabel titleLabel = new JLabel("Children App");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         panel.add(titleLabel, gbc);
 

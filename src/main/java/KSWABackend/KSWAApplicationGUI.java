@@ -10,7 +10,6 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.DefaultCategoryDataset;
-
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -21,12 +20,13 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static KSWABackend.Authentication.KSWAUserAuthentication.*;
 
 public class KSWAApplicationGUI extends JFrame {
-    //TODO: Register and Login should enable teacher to login
     private JTable childrenTable;
     private JTable subjectsTable;
 
@@ -39,7 +39,7 @@ public class KSWAApplicationGUI extends JFrame {
     private javax.swing.Timer timer;
 
     private Map<String, String> userCredentials;
-    private boolean isLoggedIn;
+    private boolean isLoggedIn = false;
     private JButton logoutButton;
 
     private JButton showGradesChartButton;
@@ -99,12 +99,10 @@ public class KSWAApplicationGUI extends JFrame {
         }
 
         if(licences[1].equals("false")) {
-            //Diagramm deaktivieren durch Lizenz
             showGradesChartButton.setVisible(false);
         }
 
         if(licences[3].equals("false")) {
-            //Kinderprofil deaktivieren durch Lizenz
             profileButton.setVisible(false);
         }
     }
@@ -148,7 +146,7 @@ public class KSWAApplicationGUI extends JFrame {
                 ImageIcon imagePath = readImageIconFromDesktop();
 
                 userCredentials.put(username, password);
-                currentTeacher = new KSWATeacher(id, username, "Teacher", imagePath); // Erstelle einen neuen Lehrer mit Bildpfad
+                currentTeacher = new KSWATeacher(id, username, "Teacher", imagePath);
                 JOptionPane.showMessageDialog(null, "Teacher account created successfully!");
             } else {
                 JOptionPane.showMessageDialog(null, "Invalid Username or Password!");
@@ -253,11 +251,9 @@ public class KSWAApplicationGUI extends JFrame {
 
             profilePanel.add(infoPanel, BorderLayout.CENTER);
 
-            // Panel für Subjects und Tests
             JPanel subjectsTestsPanel = new JPanel(new GridLayout(1, 2, 10, 10));
             subjectsTestsPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 
-            // Subjects anzeigen
             JPanel subjectsPanel = new JPanel(new BorderLayout());
             subjectsPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
             subjectsPanel.setBackground(Color.WHITE);
@@ -277,7 +273,6 @@ public class KSWAApplicationGUI extends JFrame {
 
             subjectsTestsPanel.add(subjectsPanel);
 
-            // Tests anzeigen
             JPanel testsPanel = new JPanel(new BorderLayout());
             testsPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
             testsPanel.setBackground(Color.WHITE);
@@ -384,12 +379,9 @@ public class KSWAApplicationGUI extends JFrame {
         timer.setInitialDelay(delay);
         timer.start();
     }
-    //TODO: Add methode for excel reading if the excel is manipulated
 
     private void addLoginAndRegisterComponents() {
 
-        if (isLoggedIn) {
-            // If logged in, create and add logout button
             JButton logoutButton = createStyledButton("Logout", Color.WHITE);
             logoutButton.addActionListener(e -> performLogout());
 
@@ -403,8 +395,6 @@ public class KSWAApplicationGUI extends JFrame {
             logoutPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
             mainPanel.add(logoutPanel, BorderLayout.WEST);
-        } else {
-            // If not logged in, create and add login and register buttons
             JButton loginButton = createStyledButton("Login", Color.WHITE);
             JButton registerButton = createStyledButton("Register", Color.CYAN);
             loginButton.addActionListener(e -> showLoginDialog());
@@ -412,7 +402,6 @@ public class KSWAApplicationGUI extends JFrame {
 
             JPanel loginPanel = new JPanel();
             loginPanel.setLayout(new BoxLayout(loginPanel, BoxLayout.Y_AXIS));
-            int verticalSpacing = 10;
             loginPanel.add(Box.createVerticalStrut(verticalSpacing));
             loginPanel.add(loginButton);
             loginPanel.add(Box.createVerticalStrut(verticalSpacing));
@@ -422,7 +411,6 @@ public class KSWAApplicationGUI extends JFrame {
             loginPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
             mainPanel.add(loginPanel, BorderLayout.WEST);
-        }
     }
 
 
@@ -448,20 +436,31 @@ public class KSWAApplicationGUI extends JFrame {
     }
 
     private boolean validateUserCredentials(String username, String password) {
-        //TODO: Read Usercredetials per excel
-        userCredentials.put("exampleUser", "examplePassword");
-        return userCredentials.containsKey(username) && userCredentials.get(username).equals(password);
+        try {
+            createSheetIfNotExists();
+
+            KSWATeacher isUserAuthenticated = authenticateUser(username, password);
+            System.out.println("Is User Authenticated: " + isUserAuthenticated);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private void showRegisterDialog() {
         String newUsername = JOptionPane.showInputDialog("Enter New Username:");
         String newPassword = JOptionPane.showInputDialog("Enter New Password:");
 
-        if (newUsername != null && newPassword != null && !newUsername.isEmpty() && !newPassword.isEmpty()) {
-            userCredentials.put(newUsername, newPassword);
-            JOptionPane.showMessageDialog(null, "Registration Successful!");
-        } else {
-            JOptionPane.showMessageDialog(null, "Invalid Username or Password!");
+        try {
+            createSheetIfNotExists();
+
+            String newLicence = "I7KI9KY9S";
+            boolean isUserRegistered = registerUser(newUsername, newPassword, newLicence);
+            System.out.println("Is User Registered: " + isUserRegistered);
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -482,10 +481,8 @@ public class KSWAApplicationGUI extends JFrame {
         isLoggedIn = false;
         JOptionPane.showMessageDialog(null, "Logged out successfully!");
 
-        // Schließen Sie das aktuelle LoginUI-Fenster
         dispose();
 
-        // Starten Sie eine neue Instanz von LoginUI
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -494,16 +491,6 @@ public class KSWAApplicationGUI extends JFrame {
         });
     }
 
-    private void updateUIOnLogout() {
-        // Entfernen Sie alle Komponenten aus dem Hauptpanel
-        mainPanel.removeAll();
-
-        addLoginAndRegisterComponents();
-
-        // Repaint und aktualisieren Sie das Hauptpanel, um die Änderungen anzuzeigen
-        mainPanel.revalidate();
-        mainPanel.repaint();
-    }
 
     private void addShowGradesChartButton() {
         showGradesChartButton = new JButton("Show Grades Chart");
@@ -517,14 +504,6 @@ public class KSWAApplicationGUI extends JFrame {
         buttonPanel.revalidate();
     }
 
-    private KSWAChildren getChildByIDFromDataSource(String selectedID) {
-        for (KSWAChildren child : childrenList) {
-            if (child.getId().equals(selectedID)) {
-                return child;
-            }
-        }
-        return null;
-    }
 
     private void displayGradesChart() {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
@@ -665,7 +644,7 @@ public class KSWAApplicationGUI extends JFrame {
         exportExcelButton.setFont(new Font("Arial", Font.BOLD, 16));
         exportExcelButton.addActionListener(e -> {
             String absPathWorkingdir = System.getProperty("user.dir");
-            String filePath = absPathWorkingdir + "/src/main/export_excel.xlsx";
+            String filePath = absPathWorkingdir + "/Desktop";
             KSWAExcelConverter.exportExcel(childrenList, filePath);
             JOptionPane.showMessageDialog(null, "Excel file has been created successfully!");
         });
@@ -734,8 +713,7 @@ public class KSWAApplicationGUI extends JFrame {
         }
 
         List<Long> childIds = childrenList.stream()
-                .map(KSWAChildren::getId)
-                .collect(Collectors.toList());
+                .map(KSWAChildren::getId).toList();
 
 
         Long selectedChildId = (Long) JOptionPane.showInputDialog(
@@ -807,9 +785,7 @@ public class KSWAApplicationGUI extends JFrame {
     }
 
     public void displayChildrenData() {
-
         childrenTableModel.setRowCount(0);
-
 
         if (childrenList != null && !childrenList.isEmpty()) {
             for (KSWAChildren child : childrenList) {
@@ -817,21 +793,15 @@ public class KSWAApplicationGUI extends JFrame {
             }
         }
 
-
         ListSelectionModel selectionModel = childrenTable.getSelectionModel();
 
         selectionModel.addListSelectionListener(e -> {
-
             if (!e.getValueIsAdjusting()) {
                 int selectedRow = childrenTable.getSelectedRow();
 
                 if (selectedRow >= 0 && selectedRow < childrenList.size()) {
-
-                    currentChild = childrenList.get(selectedRow);
-
-                    displaySubjects(currentChild.getChsubjects());
-
-
+                    KSWAChildren selectedChild = childrenList.get(selectedRow);
+                    displaySubjects(selectedChild.getChsubjects());
                 }
             }
         });
@@ -885,6 +855,6 @@ public class KSWAApplicationGUI extends JFrame {
             e.printStackTrace();
         }
 
-        SwingUtilities.invokeLater(() -> new KSWAApplicationGUI());
+        SwingUtilities.invokeLater(KSWAApplicationGUI::new);
     }
 }

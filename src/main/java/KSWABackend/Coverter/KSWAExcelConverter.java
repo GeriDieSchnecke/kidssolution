@@ -8,6 +8,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,6 +107,7 @@ public class KSWAExcelConverter {
 
     public static void exportExcel(List<KSWAChildren> childrenList, String filePath) {
         Workbook workbook = new XSSFWorkbook();
+        workbook.setSheetName(0, "Exported Excel Sheet " + LocalDate.now());
         Sheet sheet = workbook.createSheet("KSWA Data");
 
         Row headerRowChildren = sheet.createRow(0);
