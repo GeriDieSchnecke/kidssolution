@@ -68,7 +68,7 @@ public class KSWAUserAuthentication {
 
             if (username.equals(usernameCell) && password.equals(passwordCell)) {
                 String userId = row.getCell(0).getStringCellValue();
-                return new KSWATeacher(userId, username);
+                return new KSWATeacher(userId, username, password);
             }
         }
         return null;

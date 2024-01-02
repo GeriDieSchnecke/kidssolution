@@ -1,6 +1,7 @@
 package KSWABackend.Licencing;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class Licencing {
@@ -22,10 +23,6 @@ public class Licencing {
     public static boolean validateLicence(String licenceID){
         String[] licences = getLicences(licenceID);
 
-        if (licenceID.equals("1")){
-            return true;
-        }
-
         if(licences[0].equals("invalid")){
             return false;
         } else {
@@ -37,13 +34,24 @@ public class Licencing {
         String s = null;
         String[] CustomerLicences;
 
+        // For api testing use licenceID "1" to return valid licence
+        if (licenceID.equals("1")){
+            String testLicence = "Show kids profile@true@Show diagram@true";
+            return testLicence.split("@");
+        }
+
         try {
             // pip install json
             // pip install pycurl
             // Set path to python.exe in environment where json and pycurl is installed
 
             String absPathWorkingdir = System.getProperty("user.dir");
-            String pythonCommand = "C:/python/python.exe " + absPathWorkingdir + "/src/main/java/KSWANetLicensing/Handler/netlicensinghandler.py " + licenceID;
+
+            // set the path to your systems Python installation
+            String pythonPath = "E:/Envs/python.exe";
+            //String pythonPath = "C:/python/python.exe";
+
+            String pythonCommand = pythonPath + " " + absPathWorkingdir + "/src/main/java/KSWANetLicensing/Handler/netlicensinghandler.py " + licenceID;
             Process p = Runtime.getRuntime().exec(pythonCommand);
 
             BufferedReader stdInput = new BufferedReader(new
@@ -65,18 +73,24 @@ public class Licencing {
                 System.out.println(s);
             }
 
-            //System.out.println(returnListString);
+            System.out.println(returnListString);
 
             CustomerLicences = returnListString.split("@");
 
             return CustomerLicences;
 
-        } catch (Exception exception){
-            //exception.printStackTrace();
-            String[] invalid = new String[1];
-            invalid[0] = "invalid";
-            return invalid;
+        } catch (IOException ioException){
+            ioException.printStackTrace();
+            System.out.println("IOException: Python installation not found. Set pythonPath variable in Class Licencing.java to the Path of your systems Python.exe. For testing use licenceID \"1\" to return valid licence");
         }
+        catch (Exception exception){
+            exception.printStackTrace();
+
+        }
+        System.out.println("For testing use licenceID \"1\" to return valid licence");
+        String[] invalid = new String[1];
+        invalid[0] = "invalid";
+        return invalid;
     }
 
 }

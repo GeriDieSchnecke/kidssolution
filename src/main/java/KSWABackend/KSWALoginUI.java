@@ -1,10 +1,13 @@
 package KSWABackend;
 
+import KSWABackend.Authentication.KSWAUserAuthentication;
 import KSWABackend.KSWAApplicationGUI;
+import KSWABackend.Licencing.Licencing;
 import KSWABackend.Model.KSWATeacher;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class KSWALoginUI extends JFrame {
 
@@ -67,7 +70,13 @@ public class KSWALoginUI extends JFrame {
         registerButton.setPreferredSize(new Dimension(120, 30));
         panel.add(registerButton, gbc);
 
-        loginButton.addActionListener(e -> onLoginButtonClick());
+        loginButton.addActionListener(e -> {
+            try {
+                onLoginButtonClick();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
         registerButton.addActionListener(e -> onRegisterButtonClick());
     }
 
@@ -81,20 +90,27 @@ public class KSWALoginUI extends JFrame {
         panel.add(textField, gbc);
     }
 
-    private void onLoginButtonClick() {
+    private void onLoginButtonClick() throws IOException {
         String username = usernameField.getText();
         String password = new String(passwordField.getPassword());
 
-        if ("username".equals(username) && "password".equals(password)) {
+        KSWATeacher authenticatedTeacher = KSWAUserAuthentication.authenticateUser(username, password);
+
+        assert authenticatedTeacher != null;
+        String teacherName = authenticatedTeacher.getName();
+        String teacherPassword = authenticatedTeacher.getPassword();
+        System.out.println(teacherName);
+
+        if (teacherName.equals(username) && teacherPassword.equals(password)) {
             JOptionPane.showMessageDialog(this, "Login successful!");
-            KSWATeacher authenticatedTeacher = new KSWATeacher(username, "Teacher Name");
+            //KSWATeacher authenticatedTeacher = new KSWATeacher(username, "Teacher Name");
             loginSuccess(authenticatedTeacher);
         } else {
             JOptionPane.showMessageDialog(this, "Invalid username or password");
         }
     }
 
-    private void onRegisterButtonClick() {
+    private void onRegisterButtonClick(){
         String username = usernameField.getText();
         String password = new String(passwordField.getPassword());
         String licenceID = licenceField.getText();
@@ -104,7 +120,12 @@ public class KSWALoginUI extends JFrame {
             return;
         }
 
-        if ("uniqueID".equals(licenceID)) {
+        if (Licencing.validateLicence(licenceID)) {
+            try {
+                boolean isRegistered = KSWAUserAuthentication.registerUser(username, password, licenceID);
+            } catch (Exception exception){
+                exception.printStackTrace();
+            }
             KSWATeacher registeredTeacher = new KSWATeacher(username, "Teacher Name");
             JOptionPane.showMessageDialog(this, "Registration successful!");
             loginSuccess(registeredTeacher);

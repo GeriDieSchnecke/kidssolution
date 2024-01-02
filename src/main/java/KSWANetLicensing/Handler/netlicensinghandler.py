@@ -7,7 +7,10 @@ import json
 # pip install pycurl
 
 # Programmstart: python app.py Lizenznummer
-# I7KI9KY9S Lizenznummer
+# Lizenzen
+# I7KI9KY9S    Show diagram
+# IUX5N4DU6    Kid profile
+# I7G6NPH6C    Show diagram & Kid profile
 
 api_url = "https://go.netlicensing.io/core/v2/rest/licensee/" + \
     sys.argv[1] + "/validate" # api url mit Lizenznummer die als Argument beim Programmstart übergeben wurde

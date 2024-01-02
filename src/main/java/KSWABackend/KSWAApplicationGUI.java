@@ -1,5 +1,6 @@
 package KSWABackend;
 
+import KSWABackend.Authentication.KSWAUserAuthentication;
 import KSWABackend.Coverter.KSWAExcelConverter;
 import KSWABackend.Licencing.Licencing;
 import KSWABackend.Model.KSWAChildren;
@@ -14,6 +15,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
@@ -217,8 +219,12 @@ public class KSWAApplicationGUI extends JFrame {
         }
     }
 
-    private void displayChildrenProfile(KSWAChildren currentChild) {
-        if (currentChild != null) {
+    private void displayChildrenProfile(/*KSWAChildren currentChild*/) {
+
+        int row_index = childrenTable.getSelectedRow();
+        KSWAChildren selectedChild = childrenList.get(row_index);
+
+        if (selectedChild != null) {
             JFrame profileFrame = new JFrame("Children Profile");
             profileFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             profileFrame.setSize(600, 400);
@@ -234,15 +240,15 @@ public class KSWAApplicationGUI extends JFrame {
 
             JPanel infoPanel = new JPanel(new GridLayout(4, 1, 5, 5));
 
-            JLabel idLabel = new JLabel("ID: " + currentChild.getId());
+            JLabel idLabel = new JLabel("ID: " + selectedChild.getId());
             idLabel.setFont(new Font("Arial", Font.PLAIN, 18));
             infoPanel.add(idLabel);
 
-            JLabel nameLabel = new JLabel("Name: " + currentChild.getChprename() + " " + currentChild.getChname());
+            JLabel nameLabel = new JLabel("Name: " + selectedChild.getChprename() + " " + selectedChild.getChname());
             nameLabel.setFont(new Font("Arial", Font.PLAIN, 18));
             infoPanel.add(nameLabel);
 
-            JLabel birthdayLabel = new JLabel("Birthday: " + currentChild.getChbirthday());
+            JLabel birthdayLabel = new JLabel("Birthday: " + selectedChild.getChbirthday());
             birthdayLabel.setFont(new Font("Arial", Font.PLAIN, 18));
             infoPanel.add(birthdayLabel);
 
@@ -263,7 +269,7 @@ public class KSWAApplicationGUI extends JFrame {
             subjectsLabel.setHorizontalAlignment(SwingConstants.CENTER);
             subjectsPanel.add(subjectsLabel, BorderLayout.NORTH);
 
-            List<KSWASubject> subjects = currentChild.getChsubjects();
+            List<KSWASubject> subjects = selectedChild.getChsubjects();
             String[] subjectNames = subjects.stream().map(KSWASubject::getSuname).toArray(String[]::new);
 
             JList<String> subjectsList = new JList<>(subjectNames);
@@ -323,7 +329,7 @@ public class KSWAApplicationGUI extends JFrame {
 
     private void addChildrenProfileButton() {
         profileButton = createStyledButton("View Children's Profile", Color.LIGHT_GRAY);
-        profileButton.addActionListener(e -> displayChildrenProfile(currentChild));
+        profileButton.addActionListener(e -> displayChildrenProfile());
 
         profileButton.setPreferredSize(new Dimension(200, 30));
 
@@ -451,12 +457,12 @@ public class KSWAApplicationGUI extends JFrame {
     private void showRegisterDialog() {
         String newUsername = JOptionPane.showInputDialog("Enter New Username:");
         String newPassword = JOptionPane.showInputDialog("Enter New Password:");
+        String newLicence = JOptionPane.showInputDialog("Enter Licence:");
 
         try {
             createSheetIfNotExists();
 
-            String newLicence = "I7KI9KY9S";
-            boolean isUserRegistered = registerUser(newUsername, newPassword, newLicence);
+            boolean isUserRegistered = KSWAUserAuthentication.registerUser(newUsername, newPassword, newLicence);
             System.out.println("Is User Registered: " + isUserRegistered);
 
         } catch (IOException e) {
