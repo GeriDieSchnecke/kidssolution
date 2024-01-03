@@ -366,22 +366,11 @@ public class KSWAApplicationGUI extends JFrame {
     }
 
     private void addLoginAndRegisterComponents() {
-
-            JButton logoutButton = createStyledButton("Logout", Color.WHITE);
-            logoutButton.addActionListener(e -> performLogout());
-
-            JPanel logoutPanel = new JPanel();
-            logoutPanel.setLayout(new BoxLayout(logoutPanel, BoxLayout.Y_AXIS));
             int verticalSpacing = 10;
-            logoutPanel.add(Box.createVerticalStrut(verticalSpacing));
-            logoutPanel.add(logoutButton);
-            logoutPanel.add(Box.createVerticalStrut(verticalSpacing));
-            logoutPanel.setBackground(new Color(200, 200, 200));
-            logoutPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-
-            mainPanel.add(logoutPanel, BorderLayout.WEST);
             JButton loginButton = createStyledButton("Login", Color.WHITE);
             JButton registerButton = createStyledButton("Register", Color.CYAN);
+            JButton logoutButton = createStyledButton("Logout", Color.WHITE);
+            logoutButton.addActionListener(e -> performLogout());
             loginButton.addActionListener(e -> showLoginDialog());
             registerButton.addActionListener(e -> showRegisterDialog());
 
@@ -391,6 +380,8 @@ public class KSWAApplicationGUI extends JFrame {
             loginPanel.add(loginButton);
             loginPanel.add(Box.createVerticalStrut(verticalSpacing));
             loginPanel.add(registerButton);
+            loginPanel.add(Box.createVerticalStrut(verticalSpacing));
+            loginPanel.add(logoutButton);
             loginPanel.add(Box.createVerticalStrut(verticalSpacing));
             loginPanel.setBackground(new Color(200, 200, 200));
             loginPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
