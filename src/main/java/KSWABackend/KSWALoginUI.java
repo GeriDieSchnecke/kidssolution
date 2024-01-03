@@ -1,7 +1,6 @@
 package KSWABackend;
 
 import KSWABackend.Authentication.KSWAUserAuthentication;
-import KSWABackend.KSWAApplicationGUI;
 import KSWABackend.Licencing.Licencing;
 import KSWABackend.Model.KSWATeacher;
 
@@ -14,7 +13,6 @@ public class KSWALoginUI extends JFrame {
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JTextField licenceField;
-    private KSWAApplicationGUI applicationGUI;
 
     private static final int FRAME_WIDTH = 500;
     private static final int FRAME_HEIGHT = 400;
@@ -136,7 +134,7 @@ public class KSWALoginUI extends JFrame {
 
     private void loginSuccess(KSWATeacher authenticatedTeacher) {
         this.setVisible(false);
-        applicationGUI = new KSWAApplicationGUI(authenticatedTeacher);
+        KSWAApplicationGUI applicationGUI = new KSWAApplicationGUI(authenticatedTeacher);
         applicationGUI.setVisible(true);
     }
 

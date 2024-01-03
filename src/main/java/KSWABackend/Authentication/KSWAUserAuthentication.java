@@ -91,7 +91,7 @@ public class KSWAUserAuthentication {
             }
         }
 
-        if(Licencing.validateLicence(licenceID)){
+        if (Licencing.validateLicence(licenceID)){
             // pass
         } else {
             return false;
@@ -108,7 +108,7 @@ public class KSWAUserAuthentication {
 
         return true;
     }
-    private static int generateRandomId() {
+    public static int generateRandomId() {
         Random random = new Random();
         return random.nextInt(10000);
     }

@@ -9,6 +9,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +41,7 @@ public class KSWAExcelConverter {
                     subject.setSuname(row.getCell(cellIndex++).getStringCellValue());
                     subject.setSugrade(row.getCell(cellIndex++).getNumericCellValue());
 
-                    ArrayList<KSWATest> tests = new ArrayList<KSWATest>();
+                    ArrayList<KSWATest> tests = new ArrayList<>();
                     while (cellIndex < row.getLastCellNum() && row.getCell(cellIndex) != null) {
                         KSWATest test = new KSWATest();
                         test.setTename(row.getCell(cellIndex++).getStringCellValue());
@@ -107,54 +109,14 @@ public class KSWAExcelConverter {
 
     public static void exportExcel(List<KSWAChildren> childrenList, String filePath) {
         Workbook workbook = new XSSFWorkbook();
-        workbook.setSheetName(0, "Exported Excel Sheet " + LocalDate.now());
         Sheet sheet = workbook.createSheet("KSWA Data");
 
-        Row headerRowChildren = sheet.createRow(0);
-        headerRowChildren.createCell(0).setCellValue("ID");
-        headerRowChildren.createCell(1).setCellValue("Prename");
-        headerRowChildren.createCell(2).setCellValue("Name");
-        headerRowChildren.createCell(3).setCellValue("Birthday");
-        headerRowChildren.createCell(4).setCellValue("Subjects");
-        headerRowChildren.createCell(5).setCellValue("Tests");
+        createHeaderRow(sheet);
 
         int rowNumChildren = 1;
         for (KSWAChildren child : childrenList) {
             Row row = sheet.createRow(rowNumChildren++);
-            row.createCell(0).setCellValue(child.getId());
-            row.createCell(1).setCellValue(child.getChprename());
-            row.createCell(2).setCellValue(child.getChname());
-            row.createCell(3).setCellValue(child.getChbirthday());
-
-            Cell subjectsCell = row.createCell(4);
-            List<KSWASubject> subjects = child.getChsubjects();
-            if (subjects != null && !subjects.isEmpty()) {
-                StringBuilder subjectsStr = new StringBuilder();
-                for (KSWASubject subject : subjects) {
-                    subjectsStr.append(subject).append(", ");
-                }
-                subjectsCell.setCellValue(subjectsStr.substring(0, subjectsStr.length() - 2));
-            }
-
-            Cell testsCell = row.createCell(5);
-            List<KSWASubject> subjectsList = child.getChsubjects();
-            if (subjectsList != null && !subjectsList.isEmpty()) {
-                StringBuilder testsStr = new StringBuilder();
-                for (KSWASubject subject : subjectsList) {
-                    testsStr.append("Subject Name: ").append(subject.getSuname()).append("\n");
-
-                    List<KSWATest> tests = subject.getTests();
-                    if (tests != null && !tests.isEmpty()) {
-                        for (KSWATest test : tests) {
-                            testsStr.append("\tName: ").append(test.getTename())
-                                    .append(", Grade: ").append(test.getTegrade())
-                                    .append(", Factor: ").append(test.getTefactor())
-                                    .append(", Date: ").append(test.getTedate()).append("\n");
-                        }
-                    }
-                }
-                testsCell.setCellValue(testsStr.toString());
-            }
+            createChildRow(child, row);
         }
 
         try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
@@ -163,6 +125,57 @@ public class KSWAExcelConverter {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void createHeaderRow(Sheet sheet) {
+        Row headerRowChildren = sheet.createRow(0);
+        String[] headers = {"ID", "Prename", "Name", "Birthday", "Subjects", "Tests"};
+        for (int i = 0; i < headers.length; i++) {
+            headerRowChildren.createCell(i).setCellValue(headers[i]);
+        }
+    }
+
+    private static void createChildRow(KSWAChildren child, Row row) {
+        row.createCell(0).setCellValue(child.getId());
+        row.createCell(1).setCellValue(child.getChprename());
+        row.createCell(2).setCellValue(child.getChname());
+        row.createCell(3).setCellValue(child.getChbirthday());
+
+        Cell subjectsCell = row.createCell(4);
+        List<KSWASubject> subjects = child.getChsubjects();
+        if (subjects != null && !subjects.isEmpty()) {
+            StringBuilder subjectsStr = new StringBuilder();
+            for (KSWASubject subject : subjects) {
+                subjectsStr.append(subject.getSuname()).append(", ");
+            }
+            subjectsCell.setCellValue(subjectsStr.substring(0, subjectsStr.length() - 2));
+        }
+
+        Cell testsCell = row.createCell(5);
+        if (child.getChsubjects() != null && !child.getChsubjects().isEmpty()) {
+            StringBuilder testsStr = new StringBuilder();
+            for (KSWASubject subject : child.getChsubjects()) {
+                testsStr.append("Subject Name: ").append(subject.getSuname()).append("\n");
+
+                List<KSWATest> tests = subject.getTests();
+                if (tests != null && !tests.isEmpty()) {
+                    for (KSWATest test : tests) {
+                        appendTestInfo(testsStr, test);
+                    }
+                }
+            }
+            testsCell.setCellValue(testsStr.toString());
+        }
+    }
+
+    private static void appendTestInfo(StringBuilder testsStr, KSWATest test) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedDate = test.getTedate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().format(formatter);
+
+        testsStr.append("\tName: ").append(test.getTename())
+                .append(", Grade: ").append(test.getTegrade())
+                .append(", Factor: ").append(test.getTefactor())
+                .append(", Date: ").append(formattedDate).append("\n");
     }
 
 }

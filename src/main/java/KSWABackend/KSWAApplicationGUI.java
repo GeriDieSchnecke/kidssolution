@@ -15,14 +15,13 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
@@ -32,16 +31,14 @@ public class KSWAApplicationGUI extends JFrame {
     private JTable childrenTable;
     private JTable subjectsTable;
 
-    private JTable testsTable;
     private DefaultTableModel childrenTableModel;
     private DefaultTableModel subjectsTableModel;
     private DefaultTableModel testsTableModel;
     private final List<KSWAChildren> childrenList = new ArrayList<>();
     private JPanel mainPanel;
-    private javax.swing.Timer timer;
 
-    private Map<String, String> userCredentials;
-    private boolean isLoggedIn = false;
+    private final Map<String, String> userCredentials;
+    private boolean isLoggedIn;
     private JButton logoutButton;
 
     private JButton showGradesChartButton;
@@ -50,7 +47,6 @@ public class KSWAApplicationGUI extends JFrame {
 
     private KSWATeacher currentTeacher;
 
-    private KSWAChildren currentChild;
 
     private JTextField childrenFilterField;
 
@@ -127,6 +123,8 @@ public class KSWAApplicationGUI extends JFrame {
 
     private void filterTests() {
         String filterText = testsFilterField.getText().toLowerCase();
+        JTable testsTable = null;
+        assert false;
         DefaultTableModel model = (DefaultTableModel) testsTable.getModel();
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
         testsTable.setRowSorter(sorter);
@@ -298,22 +296,6 @@ public class KSWAApplicationGUI extends JFrame {
 
             subjectsTestsPanel.add(testsPanel);
 
-            JButton showTestsButton = new JButton("Show Tests");
-            showTestsButton.setFont(new Font("Arial", Font.PLAIN, 16));
-            Dimension buttonSize = new Dimension(150, 30);
-            showTestsButton.setPreferredSize(buttonSize);
-            showTestsButton.addActionListener(e -> {
-                int selectedIndex = subjectsList.getSelectedIndex();
-                if (selectedIndex != -1) {
-                    List<KSWATest> selectedTests = subjects.get(selectedIndex).getTests();
-                    String[] selectedTestNames = selectedTests.stream().map(KSWATest::getTename).toArray(String[]::new);
-                    testsList.setListData(selectedTestNames);
-                } else {
-                    JOptionPane.showMessageDialog(null, "Please select a subject first.");
-                }
-            });
-            subjectsTestsPanel.add(showTestsButton);
-
             profilePanel.add(subjectsTestsPanel, BorderLayout.SOUTH);
 
             profileFrame.add(profilePanel);
@@ -373,13 +355,10 @@ public class KSWAApplicationGUI extends JFrame {
         int delay = 0;
         int interval = 10000;
 
-        timer = new javax.swing.Timer(interval, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                List<KSWAChildren> childrenList = KSWAExcelConverter.readDataFromExcel();
+        javax.swing.Timer timer = new javax.swing.Timer(interval, e -> {
+            List<KSWAChildren> childrenList = KSWAExcelConverter.readDataFromExcel();
 
-                KSWAExcelConverter.writeToExcel(childrenList);
-            }
+            KSWAExcelConverter.writeToExcel(childrenList);
         });
 
         timer.setInitialDelay(delay);
@@ -489,12 +468,7 @@ public class KSWAApplicationGUI extends JFrame {
 
         dispose();
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new KSWALoginUI();
-            }
-        });
+        SwingUtilities.invokeLater(KSWALoginUI::new);
     }
 
 
@@ -650,7 +624,7 @@ public class KSWAApplicationGUI extends JFrame {
         exportExcelButton.setFont(new Font("Arial", Font.BOLD, 16));
         exportExcelButton.addActionListener(e -> {
             String absPathWorkingdir = System.getProperty("user.dir");
-            String filePath = absPathWorkingdir + "/Desktop";
+            String filePath = absPathWorkingdir + "\\Desktop";
             KSWAExcelConverter.exportExcel(childrenList, filePath);
             JOptionPane.showMessageDialog(null, "Excel file has been created successfully!");
         });
@@ -774,21 +748,31 @@ public class KSWAApplicationGUI extends JFrame {
             double testGrade = Double.parseDouble(JOptionPane.showInputDialog("Enter Grade for the Test:"));
             double testFactor = Double.parseDouble(JOptionPane.showInputDialog("Enter Factor for the Test:"));
             String testDate = JOptionPane.showInputDialog("Enter Date for the Test (YYYY-MM-DD):");
+            long testId = generateRandomId();
 
-            KSWATest newTest = new KSWATest(testGrade, testName, testFactor, new Date(testDate), 0);
+            KSWATest newTest = new KSWATest(testGrade, testName, testFactor, parseDate(testDate), testId);
+            List<KSWATest> childrentests = selectedSubject.getTests();
+            childrentests.add(newTest);
 
-            ArrayList<KSWATest> tests = null;
-            tests.add(newTest);
-
-            selectedSubject.setTests(tests);
+            selectedSubject.setTests(childrentests);
 
             int option = JOptionPane.showConfirmDialog(null, "Add another Test?", "Add Test", JOptionPane.YES_NO_OPTION);
-            addMoreTests = option == JOptionPane.YES_OPTION;
-
-            displayTests(selectedSubject.getTests());
+            addMoreTests = (option == JOptionPane.YES_OPTION);
         }
+
         displayTests(selectedSubject.getTests());
     }
+
+    private Date parseDate(String dateString) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            return dateFormat.parse(dateString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     public void displayChildrenData() {
         childrenTableModel.setRowCount(0);
@@ -805,9 +789,12 @@ public class KSWAApplicationGUI extends JFrame {
             if (!e.getValueIsAdjusting()) {
                 int selectedRow = childrenTable.getSelectedRow();
 
-                if (selectedRow >= 0 && selectedRow < childrenList.size()) {
-                    KSWAChildren selectedChild = childrenList.get(selectedRow);
-                    displaySubjects(selectedChild.getChsubjects());
+                if (selectedRow >= 0) {
+                    assert childrenList != null;
+                    if (selectedRow < childrenList.size()) {
+                        KSWAChildren selectedChild = childrenList.get(selectedRow);
+                        displaySubjects(selectedChild.getChsubjects());
+                    }
                 }
             }
         });
@@ -825,9 +812,12 @@ public class KSWAApplicationGUI extends JFrame {
 
         subjectsTable.getSelectionModel().addListSelectionListener(e -> {
             int selectedRow = subjectsTable.getSelectedRow();
-            if (selectedRow >= 0 && selectedRow < subjects.size()) {
-                KSWASubject selectedSubject = subjects.get(selectedRow);
-                displayTests(selectedSubject.getTests());
+            if (selectedRow >= 0) {
+                assert subjects != null;
+                if (selectedRow < subjects.size()) {
+                    KSWASubject selectedSubject = subjects.get(selectedRow);
+                    displayTests(selectedSubject.getTests());
+                }
             }
         });
     }
@@ -838,17 +828,25 @@ public class KSWAApplicationGUI extends JFrame {
             for (KSWATest test : tests) {
                 testsInfo.append(test.getTename()).append(": ").append(test.getTegrade()).append(", ");
             }
-            testsInfo.delete(testsInfo.length() - 2, testsInfo.length());
+            if (testsInfo.length() >= 2) {
+                testsInfo.delete(testsInfo.length() - 2, testsInfo.length());
+            }
         }
         return testsInfo.toString();
     }
+
 
     public void displayTests(List<KSWATest> tests) {
         testsTableModel.setRowCount(0);
 
         if (tests != null && !tests.isEmpty()) {
             for (KSWATest test : tests) {
-                testsTableModel.addRow(new Object[]{test.getTename(), test.getTegrade(), test.getTefactor(), test.getTedate()});
+                Object[] objs = new Object[3];
+                objs[0] =  test.getTename();
+                objs[1] = test.getTegrade();
+                objs[2] = test.getTefactor();
+                objs[3] = test.getTedate();
+                testsTableModel.addRow(Arrays.stream(objs).toArray());
             }
         }
     }

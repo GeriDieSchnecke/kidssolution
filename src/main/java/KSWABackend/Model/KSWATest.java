@@ -59,4 +59,16 @@ public class KSWATest {
     public void setId(long id) {
         this.id = id;
     }
+
+    @Override
+    public String toString() {
+        return "KSWATest{" +
+                "tegrade=" + tegrade +
+                ", tename='" + tename + '\'' +
+                ", tefactor=" + tefactor +
+                ", tedate=" + tedate +
+                ", id=" + id +
+                '}';
+    }
+
 }
