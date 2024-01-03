@@ -59,7 +59,6 @@ public class KSWAApplicationGUI extends JFrame {
         userCredentials = new HashMap<>();
         isLoggedIn = false;
         initializeUI();
-        scheduleDataUpdates();
         displayChildrenData();
         addShowGradesChartButton();
         addLoginAndRegisterComponents();
@@ -75,7 +74,6 @@ public class KSWAApplicationGUI extends JFrame {
         userCredentials = new HashMap<>();
         isLoggedIn = true;
         initializeUI();
-        scheduleDataUpdates();
         displayChildrenData();
         addShowGradesChartButton();
         addLoginAndRegisterComponents();
@@ -357,19 +355,6 @@ public class KSWAApplicationGUI extends JFrame {
         buttonPanel.revalidate();
     }
 
-    private void scheduleDataUpdates() {
-        int delay = 0;
-        int interval = 10000;
-
-        javax.swing.Timer timer = new javax.swing.Timer(interval, e -> {
-            List<KSWAChildren> childrenList = KSWAExcelConverter.readDataFromExcel();
-
-            KSWAExcelConverter.writeToExcel(childrenList);
-        });
-
-        timer.setInitialDelay(delay);
-        timer.start();
-    }
 
     private void addLoginAndRegisterComponents() {
             int verticalSpacing = 10;
@@ -639,9 +624,8 @@ public class KSWAApplicationGUI extends JFrame {
                 File selectedFile = fileChooser.getSelectedFile();
                 String filePath = selectedFile.getAbsolutePath();
                 List<KSWAChildren> importedData = importExcel(filePath);
-                for (KSWAChildren child : importedData) {
-                    displayChildrenProfile(child);
-                }
+                childrenList.addAll(importedData);
+                displayChildrenData();
             }
         });
         buttonPanel.add(importExcelButton);

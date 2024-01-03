@@ -9,12 +9,15 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.IntStream;
+
+import static KSWABackend.Authentication.KSWAUserAuthentication.generateRandomId;
 
 public class KSWAExcelConverter {
 
@@ -121,94 +124,92 @@ public class KSWAExcelConverter {
             if (iterator.hasNext()) {
                 iterator.next();
             }
-
+            KSWAChildren child = null;
             while (iterator.hasNext()) {
                 Row currentRow = iterator.next();
-                KSWAChildren child = parseRowToChild(currentRow);
+                child = parseRowToChild(currentRow);
                 childrenList.add(child);
             }
 
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         }
 
         return childrenList;
     }
 
-    private static KSWAChildren parseRowToChild(Row row) {
+    private static KSWAChildren parseRowToChild(Row row) throws ParseException {
         KSWAChildren child = new KSWAChildren();
 
         child.setId((long) row.getCell(0).getNumericCellValue());
         child.setChprename(row.getCell(1).getStringCellValue());
         child.setChname(row.getCell(2).getStringCellValue());
         child.setChbirthday(row.getCell(3).getStringCellValue());
-
-        String subjectsCell = row.getCell(4).getStringCellValue();
-        List<KSWASubject> subjects = parseSubjectsFromString(subjectsCell);
-        child.setChsubjects(subjects);
-
-        String testsCell = row.getCell(5).getStringCellValue();
-        List<KSWATest> tests = parseTestsFromString(testsCell);
-
+        child.setChsubjects(parseSubjectsFromString(child, row.getCell(4).getStringCellValue()));
+        for (KSWASubject subject : child.getChsubjects()) {
+            subject.setTests(parseTestsFromString(row.getCell(5).getStringCellValue()));
+        }
         return child;
     }
 
-    private static List<KSWASubject> parseSubjectsFromString(String subjectsStr) {
+    private static List<KSWASubject> parseSubjectsFromString(KSWAChildren child, String subjectStrings) {
+        String[] strings = subjectStrings.split(", ");
         List<KSWASubject> subjects = new ArrayList<>();
-        String[] subjectEntities = subjectsStr.split(", ");
-        int counter = 0;
-        for (String subjectEntity : subjectEntities) {
+
+        for (String str : strings) {
             KSWASubject subject = new KSWASubject();
-            if (counter == 0) {
-                subject.setSuname(subjectEntity);
-            }
-            else if (counter == 1) {
-                subject.setSugrade(Double.parseDouble(subjectEntity));
-            }
-            else if (counter == 2) {
-                subject.setId(Long.parseLong(subjectEntity));
-            }
-            else if (counter == 3) {
-                subject.setTests(parseTestsFromString(subjectEntity));
-            }
-            counter++;
+            subject.setId(generateRandomId());
+            subject.setSuname(String.valueOf(str));
+            subject.setSugrade(new Random().nextInt(10));
+            subject.setChildren(child);
             subjects.add(subject);
         }
+
         return subjects;
     }
 
-    private static List<KSWATest> parseTestsFromString(String testsStr) {
+    private static List<KSWATest> parseTestsFromString(String testsStr) throws ParseException {
         List<KSWATest> tests = new ArrayList<>();
         String[] testLines = testsStr.split("\n");
+        testLines[0] = "";
         for (String testLine : testLines) {
-            KSWATest test = parseTestLine(testLine);
-            tests.add(test);
+            if (!testLine.isEmpty()) {
+                KSWATest test = parseTestLine(testLine);
+                tests.add(test);
+            }
         }
         return tests;
     }
 
-    private static KSWATest parseTestLine(String testStr) {
+    private static KSWATest parseTestLine(String testStr) throws ParseException {
         KSWATest test = new KSWATest();
-        String[] testparts = testStr.split(",");
-        int counter = 0;
-        for (String testpart : testparts) {
-            if (counter == 0) {
-                test.setTename(testpart);
-                counter++;
+        String[] testparts = testStr.split(",\\s*");
+
+        List<String> tempList = new ArrayList<>();
+        for (String str : testparts) {
+            String[] subParts = str.split(":");
+            for (int i = 0; i < subParts.length; i++) {
+                subParts[i] = subParts[i].replace(",", "").replace(":", "");
             }
-            else if (counter == 1) {
-                test.setTegrade(Double.parseDouble(testpart));
-                counter++;
-            }
-            else if (counter == 2) {
-                test.setTefactor(Double.parseDouble(testpart));
-                counter++;
-            }
-            else if (counter == 3) {
-                test.setTedate(Date.valueOf(testpart));
-                counter++;
-            }
+            tempList.addAll(Arrays.asList(subParts));
         }
+
+
+        String[] newparts = IntStream.range(0, tempList.size())
+                .filter(i -> i % 2 != 0)
+                .mapToObj(tempList::get)
+                .toArray(String[]::new);
+
+        test.setTename(newparts[0]);
+        test.setTegrade(Double.parseDouble(newparts[1]));
+        test.setTefactor(Double.parseDouble(newparts[2]));
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        java.util.Date parsedDate = dateFormat.parse(newparts[3]);
+        Date sqlDate = new Date(parsedDate.getTime());
+        test.setTedate(sqlDate);
+        test.setId(new Random().nextInt(1000));
         return test;
     }
 
