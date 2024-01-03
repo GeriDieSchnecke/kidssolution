@@ -8,10 +8,12 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class KSWAExcelConverter {
@@ -92,7 +94,7 @@ public class KSWAExcelConverter {
                             row.createCell(cellIndex++).setCellValue(test.getTename());
                             row.createCell(cellIndex++).setCellValue(test.getTegrade());
                             row.createCell(cellIndex++).setCellValue(test.getTefactor());
-                            row.createCell(cellIndex++).setCellValue(test.getTedate().toString()); // Konvertierung des Datums in String
+                            row.createCell(cellIndex++).setCellValue(test.getTedate().toString());
                         }
                     }
                 }
@@ -106,6 +108,110 @@ public class KSWAExcelConverter {
             e.printStackTrace();
         }
     }
+
+    public static List<KSWAChildren> importExcel(String filePath) {
+        List<KSWAChildren> childrenList = new ArrayList<>();
+
+        try {
+            FileInputStream fileIn = new FileInputStream(filePath);
+            Workbook workbook = new XSSFWorkbook(fileIn);
+            Sheet sheet = workbook.getSheetAt(0);
+
+            Iterator<Row> iterator = sheet.iterator();
+            if (iterator.hasNext()) {
+                iterator.next();
+            }
+
+            while (iterator.hasNext()) {
+                Row currentRow = iterator.next();
+                KSWAChildren child = parseRowToChild(currentRow);
+                childrenList.add(child);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return childrenList;
+    }
+
+    private static KSWAChildren parseRowToChild(Row row) {
+        KSWAChildren child = new KSWAChildren();
+
+        child.setId((long) row.getCell(0).getNumericCellValue());
+        child.setChprename(row.getCell(1).getStringCellValue());
+        child.setChname(row.getCell(2).getStringCellValue());
+        child.setChbirthday(row.getCell(3).getStringCellValue());
+
+        String subjectsCell = row.getCell(4).getStringCellValue();
+        List<KSWASubject> subjects = parseSubjectsFromString(subjectsCell);
+        child.setChsubjects(subjects);
+
+        String testsCell = row.getCell(5).getStringCellValue();
+        List<KSWATest> tests = parseTestsFromString(testsCell);
+
+        return child;
+    }
+
+    private static List<KSWASubject> parseSubjectsFromString(String subjectsStr) {
+        List<KSWASubject> subjects = new ArrayList<>();
+        String[] subjectEntities = subjectsStr.split(", ");
+        int counter = 0;
+        for (String subjectEntity : subjectEntities) {
+            KSWASubject subject = new KSWASubject();
+            if (counter == 0) {
+                subject.setSuname(subjectEntity);
+            }
+            else if (counter == 1) {
+                subject.setSugrade(Double.parseDouble(subjectEntity));
+            }
+            else if (counter == 2) {
+                subject.setId(Long.parseLong(subjectEntity));
+            }
+            else if (counter == 3) {
+                subject.setTests(parseTestsFromString(subjectEntity));
+            }
+            counter++;
+            subjects.add(subject);
+        }
+        return subjects;
+    }
+
+    private static List<KSWATest> parseTestsFromString(String testsStr) {
+        List<KSWATest> tests = new ArrayList<>();
+        String[] testLines = testsStr.split("\n");
+        for (String testLine : testLines) {
+            KSWATest test = parseTestLine(testLine);
+            tests.add(test);
+        }
+        return tests;
+    }
+
+    private static KSWATest parseTestLine(String testStr) {
+        KSWATest test = new KSWATest();
+        String[] testparts = testStr.split(",");
+        int counter = 0;
+        for (String testpart : testparts) {
+            if (counter == 0) {
+                test.setTename(testpart);
+                counter++;
+            }
+            else if (counter == 1) {
+                test.setTegrade(Double.parseDouble(testpart));
+                counter++;
+            }
+            else if (counter == 2) {
+                test.setTefactor(Double.parseDouble(testpart));
+                counter++;
+            }
+            else if (counter == 3) {
+                test.setTedate(Date.valueOf(testpart));
+                counter++;
+            }
+        }
+        return test;
+    }
+
 
     public static void exportExcel(List<KSWAChildren> childrenList, String filePath) {
         Workbook workbook = new XSSFWorkbook();

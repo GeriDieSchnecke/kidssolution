@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.List;
 
 import static KSWABackend.Authentication.KSWAUserAuthentication.*;
+import static KSWABackend.Coverter.KSWAExcelConverter.importExcel;
 
 public class KSWAApplicationGUI extends JFrame {
     private JTable childrenTable;
@@ -217,10 +218,15 @@ public class KSWAApplicationGUI extends JFrame {
         }
     }
 
-    private void displayChildrenProfile(/*KSWAChildren currentChild*/) {
-
-        int row_index = childrenTable.getSelectedRow();
-        KSWAChildren selectedChild = childrenList.get(row_index);
+    private void displayChildrenProfile(KSWAChildren currentChild) {
+        KSWAChildren selectedChild;
+        if (currentChild != null) {
+            selectedChild = currentChild;
+        }
+        else {
+            int row_index = childrenTable.getSelectedRow();
+            selectedChild = childrenList.get(row_index);
+        }
 
         if (selectedChild != null) {
             JFrame profileFrame = new JFrame("Children Profile");
@@ -311,7 +317,7 @@ public class KSWAApplicationGUI extends JFrame {
 
     private void addChildrenProfileButton() {
         profileButton = createStyledButton("View Children's Profile", Color.LIGHT_GRAY);
-        profileButton.addActionListener(e -> displayChildrenProfile());
+        profileButton.addActionListener(e -> displayChildrenProfile(null));
 
         profileButton.setPreferredSize(new Dimension(200, 30));
 
@@ -615,11 +621,30 @@ public class KSWAApplicationGUI extends JFrame {
         exportExcelButton.setFont(new Font("Arial", Font.BOLD, 16));
         exportExcelButton.addActionListener(e -> {
             String absPathWorkingdir = System.getProperty("user.dir");
-            String filePath = absPathWorkingdir + "\\Desktop";
+            String filePath = absPathWorkingdir + "\\KidsSolutionExport.xlsx";
             KSWAExcelConverter.exportExcel(childrenList, filePath);
             JOptionPane.showMessageDialog(null, "Excel file has been created successfully!");
         });
         buttonPanel.add(exportExcelButton);
+
+        JButton importExcelButton = new JButton("Import from Excel");
+        importExcelButton.setFont(new Font("Arial", Font.BOLD, 16));
+        importExcelButton.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Select Excel File");
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Excel Files", "xlsx", "xls"));
+            int returnValue = fileChooser.showOpenDialog(null);
+            if (returnValue == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                String filePath = selectedFile.getAbsolutePath();
+                List<KSWAChildren> importedData = importExcel(filePath);
+                for (KSWAChildren child : importedData) {
+                    displayChildrenProfile(child);
+                }
+            }
+        });
+        buttonPanel.add(importExcelButton);
 
         setVisible(true);
     }
