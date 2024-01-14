@@ -455,11 +455,15 @@ public class KSWAApplicationGUI extends JFrame {
 
 
     private void addShowGradesChartButton() {
-        showGradesChartButton = new JButton("Show Grades Chart");
-        showGradesChartButton.setFont(new Font("Arial", Font.BOLD, 14));
-        showGradesChartButton.setBackground(Color.WHITE);
-
+        JButton showGradesChartButton = createStyledButton("Show Grades Chart", Color.LIGHT_GRAY);
         showGradesChartButton.addActionListener(e -> displayGradesChart());
+
+        JPanel profilePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        profilePanel.add(showGradesChartButton);
+        profilePanel.setBackground(new Color(200, 200, 200));
+        profilePanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        mainPanel.add(profilePanel, BorderLayout.NORTH);
 
         JPanel buttonPanel = (JPanel) ((BorderLayout) mainPanel.getLayout()).getLayoutComponent(BorderLayout.SOUTH);
         buttonPanel.add(showGradesChartButton);
